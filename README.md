@@ -27,6 +27,15 @@ I originally developed this against Rust 1.15.0.
 
 [rust]: https://www.rust-lang.org/en-US/install.html
 
+### URL transformations
+
+*   Twitter links to the mobile site (`mobile.twitter.com`) are flipped to
+    point to the desktop site (`twitter.com`).
+*   Tracking data is partially stripped from Amazon, Buzzfeed, Mashable and
+    Medium URLs.
+*   The `#notes` fragment is removed from Tumblr URLs.
+*   Everything except the `?v=` query parameter is removed from YouTube URLs.
+
 ### Motivation
 
 I first got the idea for a script to access Safari URLs [from Dr. Drang][dr].

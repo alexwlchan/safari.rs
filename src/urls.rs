@@ -45,6 +45,7 @@ pub fn tidy_url(url: String) -> String {
     }
 
     // Remove &feature=youtu.be from YouTube URLs
+    // TODO: What does this do with the timestamp URL fragment?
     if parsed_url.netloc.ends_with("youtube.com") {
         let query = parsed_url.get_parsed_query().unwrap();
         let video_id = query.get_first_from_str("v").unwrap();
