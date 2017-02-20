@@ -1,0 +1,6 @@
+[package]
+name = "furl"
+version = "1.0.0"
+authors = ["Alex Chan <a.chan@wellcome.ac.uk>"]
+
+[dependencies]
