@@ -1,7 +1,7 @@
 [package]
-name = "furl"
+name = "safari-url"
 version = "1.0.0"
-authors = ["Alex Chan <a.chan@wellcome.ac.uk>"]
+authors = ["Alex Chan <alex@alexwlchan.net>"]
 
 [dependencies]
 clap = {version = "2.19", features = ["yaml"]}
