@@ -1,5 +1,5 @@
 [root]
-name = "furl"
+name = "safari-url"
 version = "1.0.0"
 dependencies = [
  "clap 2.20.5 (registry+https://github.com/rust-lang/crates.io-index)",
