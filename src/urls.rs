@@ -22,9 +22,11 @@ pub fn tidy_url(url: String) -> String {
         parsed_url.path = new_path;
     }
 
-    // Strip tracking junk from Medium
-    if parsed_url.netloc == "medium.com" {
-        parsed_url.fragment = None;
+    // Strip tracking junk from Medium, Mashable and Buzzfeed
+    if (parsed_url.netloc == "medium.com") ||
+       (parsed_url.netloc == "www.buzzfeed.com") ||
+       (parsed_url.netloc == "mashable.com") {
+            parsed_url.fragment = None;
     }
 
     // Remove '#notes' from Tumblr URLs
@@ -85,4 +87,9 @@ tidy_url_tests! {
 
     url_tm_0:  ("http://azurelunatic.tumblr.com/post/155525051123/things-about-hufflepuffs-539#notes",
                 "http://azurelunatic.tumblr.com/post/155525051123/things-about-hufflepuffs-539"),
+
+    url_8:   ("https://www.buzzfeed.com/katienotopoulos/the-end-of-apple-man#.biqmkzz8kn",
+              "https://www.buzzfeed.com/katienotopoulos/the-end-of-apple-man"),
+    url_9:   ("http://mashable.com/2016/03/21/apple-liam-recycling-robot/#b9y4lv3m4qqX",
+              "http://mashable.com/2016/03/21/apple-liam-recycling-robot/"),
 }
