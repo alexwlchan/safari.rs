@@ -4,3 +4,5 @@ version = "1.0.0"
 authors = ["Alex Chan <a.chan@wellcome.ac.uk>"]
 
 [dependencies]
+clap = {version = "2.19", features = ["yaml"]}
+urlparse = "0.7.3"

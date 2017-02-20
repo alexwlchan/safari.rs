@@ -1,0 +1,9 @@
+name: furl
+version: "1.0.0"
+author: Alex Chan <alex@alexwlchan.net>
+about: Utility for fetching URLs from Safari on macOS.
+subcommands:
+  - furl:
+      about: Get the URL of the frontmost tab
+  - 2url:
+      about: Get the URL of the first tab of window 2
