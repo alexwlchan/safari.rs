@@ -18,9 +18,7 @@ You need [Rust installed][rust].  Then clone the repository and run
 `cargo install`:
 
 ```console
-$ git clone git@github.com:alexwlchan/safari-url.git
-$ cd safari-url
-$ cargo install
+$ cargo install --git https://github.com/alexwlchan/safari-url
 ```
 
 I originally developed this against Rust 1.15.0.
