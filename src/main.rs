@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate tera;
 extern crate urlparse;
 
 use std::process;
@@ -18,8 +20,13 @@ fn main() {
 
     if let Some(_) = matches.subcommand_matches("furl") {
         url = safari::safari_furl();
+        print!("{}", urls::tidy_url(url));
     } else if let Some(_) = matches.subcommand_matches("2url") {
         url = safari::safari_2url();
+        print!("{}", urls::tidy_url(url));
+    } else if let Some(_) = matches.subcommand_matches("clean-tabs") {
+        let urls = vec!["https://twitter.com", "https://www.facebook.com"];
+        safari::safari_closetabs(urls);
     } else {
         App::from_yaml(yaml)
             .usage("furl <subcommand>")
@@ -27,6 +34,4 @@ fn main() {
             .ok();
         process::exit(1);
     }
-
-    print!("{}", urls::tidy_url(url));
 }

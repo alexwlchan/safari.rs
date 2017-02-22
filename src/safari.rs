@@ -1,5 +1,7 @@
 use std::process::Command;
 
+use tera::Context;
+
 
 pub fn safari_furl() -> String {
     run_applescript("tell application \"Safari\" to get URL of document 1")
@@ -8,6 +10,16 @@ pub fn safari_furl() -> String {
 
 pub fn safari_2url() -> String {
     run_applescript("tell application \"Safari\" to get URL of document 2")
+}
+
+
+pub fn safari_closetabs(urls: Vec<&str>) -> String {
+    let tera = compile_templates!("src/templates/*");
+    let mut context = Context::new();
+    context.add("urls", &urls);
+
+    let script = tera.render("clean-tabs.scpt", context).unwrap();
+    run_applescript(&script)
 }
 
 
