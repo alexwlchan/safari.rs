@@ -24,8 +24,13 @@ fn main() {
     } else if let Some(_) = matches.subcommand_matches("2url") {
         url = safari::safari_2url();
         print!("{}", urls::tidy_url(url));
-    } else if let Some(_) = matches.subcommand_matches("clean-tabs") {
-        let urls = vec!["https://twitter.com", "https://www.facebook.com"];
+    } else if let Some(matches) = matches.subcommand_matches("clean-tabs") {
+        // TODO: Tidy this up!!
+        let urls = matches.args.get("urls").unwrap()
+                          .vals.get(1).unwrap()
+                          .to_str().unwrap()
+                          .split(",")
+                          .collect();
         safari::safari_closetabs(urls);
     } else {
         App::from_yaml(yaml)
