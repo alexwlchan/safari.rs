@@ -12,3 +12,5 @@ subcommands:
       args:
         - urls:
             help: list of URLs to close
+  - list-tabs:
+      about: print the URL of every tab to stdout

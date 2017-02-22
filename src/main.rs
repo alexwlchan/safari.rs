@@ -32,6 +32,9 @@ fn main() {
                           .split(",")
                           .collect();
         safari::safari_closetabs(urls);
+    } else if let Some(_) = matches.subcommand_matches("list-tabs") {
+        let result = safari::list_open_tabs();
+        println!("{}", result);
     } else {
         App::from_yaml(yaml)
             .usage("furl <subcommand>")

@@ -24,10 +24,20 @@ safari-url provides some tools for interacting with Safari.
 3.  Close tabs containing certain URLs:
 
     ```console
-    $ cargo run -- clean-tabs https://www.youtube.com,https://twitter.com
+    $ safari-url clean-tabs https://www.youtube.com,https://twitter.com
     ```
 
     I find this useful for quickly cutting down my open tabs.
+
+4.  List the tabs that are open in every window:
+
+    ```console
+    $ safari-url list-tabs
+    https://github.com/alexwlchan/ao3
+    https://www.susanjfowler.com/blog/2017/2/19/reflecting-on-one-very-strange-year-at-uber
+    https://github.com/Keats/tera
+    https://crates.io/crates/tera
+    ```
 
 ### Installation
 
