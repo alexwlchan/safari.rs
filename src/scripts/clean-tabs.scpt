@@ -9,7 +9,7 @@ tell application "Safari"
             {% for url in urls %}
             try
                 tell t
-                    if (URL starts with "{{ url }}") then close
+                    if (URL contains "{{ url }}") then close
                 end tell
             end try
             {% endfor %}
