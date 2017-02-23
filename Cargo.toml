@@ -5,4 +5,5 @@ authors = ["Alex Chan <alex@alexwlchan.net>"]
 
 [dependencies]
 clap = {version = "2.19", features = ["yaml"]}
+tera = "0.7.2"
 urlparse = "0.7.3"

@@ -1,16 +1,43 @@
 # safari-url
 
-safari-url is a tool for providing quick access to URLs in Safari.
-It also  does some cleaning of the URL -- removing mobile URLs,
-tracking junk, and so on.
+safari-url provides some tools for interacting with Safari.
 
-```console
-$ safari-url furl
-https://github.com/alexwlchan/safari-url⏎
-```
+## Commands
 
-I use this in Keyboard Maestro and shell scripts for getting information
-from my web browser.
+1.  Get the URL of the frontmost tab:
+
+    ```console
+    $ safari-url furl
+    http://aromantic.wikia.com/wiki/Alterous⏎
+    ```
+
+2.  Get the URL of the front tab in window 2:
+
+    ```console
+    $ safari-url 2url
+    http://stackoverflow.com/questions/39775060/reverse-iterating-over-a-vec-versus-vec-iter#39775142⏎
+    ```
+
+    This is useful if you have two Safari windows open, and you want to
+    copy the URL from one window into a form in another.
+
+3.  Close tabs containing certain URLs:
+
+    ```console
+    $ safari-url clean-tabs https://www.youtube.com,https://twitter.com
+    ```
+
+    I find this useful for quickly cutting down my open tabs.
+
+4.  List the tabs that are open in every window:
+
+    ```console
+    $ safari-url list-tabs
+    https://github.com/alexwlchan/ao3
+    https://www.susanjfowler.com/blog/2017/2/19/reflecting-on-one-very-strange-year-at-uber
+    https://github.com/Keats/tera
+    https://crates.io/crates/tera
+    ```
 
 ### Installation
 
@@ -26,6 +53,9 @@ I originally developed this against Rust 1.15.0.
 [rust]: https://www.rust-lang.org/en-US/install.html
 
 ### URL transformations
+
+The `furl` and `2url` tabs will do a bit of cleaning before they return
+the URL:
 
 *   Twitter links to the mobile site (`mobile.twitter.com`) are flipped to
     point to the desktop site (`twitter.com`).
