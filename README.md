@@ -1,20 +1,20 @@
-# safari-url
+# safari.rs
 
-safari-url provides some tools for interacting with Safari.
+safari provides some tools for interacting with Safari.
 
 ## Commands
 
 1.  Get the URL of the frontmost tab:
 
     ```console
-    $ safari-url furl
+    $ safari furl
     http://aromantic.wikia.com/wiki/Alterous⏎
     ```
 
 2.  Get the URL of the front tab in window 2:
 
     ```console
-    $ safari-url 2url
+    $ safari 2url
     http://stackoverflow.com/questions/39775060/reverse-iterating-over-a-vec-versus-vec-iter#39775142⏎
     ```
 
@@ -24,7 +24,7 @@ safari-url provides some tools for interacting with Safari.
 3.  Close tabs containing certain URLs:
 
     ```console
-    $ safari-url clean-tabs https://www.youtube.com,https://twitter.com
+    $ safari clean-tabs youtube.com,twitter.com
     ```
 
     I find this useful for quickly cutting down my open tabs.
@@ -32,7 +32,7 @@ safari-url provides some tools for interacting with Safari.
 4.  List the tabs that are open in every window:
 
     ```console
-    $ safari-url list-tabs
+    $ safari list-tabs
     https://github.com/alexwlchan/ao3
     https://www.susanjfowler.com/blog/2017/2/19/reflecting-on-one-very-strange-year-at-uber
     https://github.com/Keats/tera
@@ -45,7 +45,7 @@ You need [Rust installed][rust].  Then clone the repository and run
 `cargo install`:
 
 ```console
-$ cargo install --git https://github.com/alexwlchan/safari-url
+$ cargo install --git https://github.com/alexwlchan/safari.rs
 ```
 
 I originally developed this against Rust 1.15.0.

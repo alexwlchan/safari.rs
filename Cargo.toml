@@ -1,6 +1,6 @@
 [package]
-name = "safari-url"
-version = "1.0.0"
+name = "safari"
+version = "1.1.0"
 authors = ["Alex Chan <alex@alexwlchan.net>"]
 
 [dependencies]
