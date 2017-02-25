@@ -39,6 +39,12 @@ safari provides some tools for interacting with Safari.
     https://crates.io/crates/tera
     ```
 
+5.  List the URLs in Safari Reading List:
+
+    ```console
+    $ safari reading-list
+    ```
+
 ### Installation
 
 You need [Rust installed][rust].  Then clone the repository and run

@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate clap;
+extern crate plist;
 #[macro_use]
 extern crate tera;
 extern crate urlparse;
@@ -35,6 +36,8 @@ fn main() {
     } else if let Some(_) = matches.subcommand_matches("list-tabs") {
         let result = safari::list_open_tabs();
         println!("{}", result);
+    } else if let Some(_) = matches.subcommand_matches("reading-list") {
+        safari::reading_list();
     } else {
         App::from_yaml(yaml)
             .usage("furl <subcommand>")

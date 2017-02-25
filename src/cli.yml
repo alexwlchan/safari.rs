@@ -14,3 +14,5 @@ subcommands:
             help: list of URLs to close
   - list-tabs:
       about: print the URL of every tab to stdout
+  - reading-list:
+      about: print the URL of every entry in Reading List
