@@ -1,7 +1,6 @@
-name: furl
-version: "1.0.0"
+name: safari
 author: Alex Chan <alex@alexwlchan.net>
-about: Utility for interacting with URLs in Safari on macOS.
+about: Utility for interacting with Safari on macOS.
 subcommands:
   - furl:
       about: Get the URL of the frontmost tab
@@ -13,6 +12,6 @@ subcommands:
         - urls:
             help: list of URLs to close
   - list-tabs:
-      about: print the URL of every tab to stdout
+      about: Print the URL of every tab to stdout
   - reading-list:
-      about: print the URL of every entry in Reading List
+      about: Print the URL of every entry in Reading List
