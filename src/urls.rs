@@ -167,7 +167,7 @@ tidy_url_tests! {
   ),
 
   multiple_utm_tracker_with_others: (
-    "https://example.com?utm_medium=social&foo=bar&utm_source=twitter&bar=baz",
-    "https://example.com?foo=bar&bar=baz",
+    "https://example.com?utm_medium=social&foo=bar&utm_source=twitter",
+    "https://example.com?foo=bar",
   ),
 }
