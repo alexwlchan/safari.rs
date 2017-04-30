@@ -68,15 +68,24 @@ pub fn safari_closetabs(urls: Vec<&str>) -> String {
 }
 
 
-/// Prints a list of open tabs in Safari
-pub fn list_open_tabs() -> String {
-    let list_open_tabs_template = include_str!("scripts/list-open-tabs.scpt");
-
-    let context = Context::new();
-    let script = Tera::one_off(&list_open_tabs_template,
-                               context,
-                               false).unwrap();
-    run_applescript(&script).stdout
+/// Return a list of URLs from Safari.
+///
+/// This returns a list of URLs, one for every tab in Safari.  Iteration
+/// order depends on AppleScript, which I don't think is guaranteed to be
+/// stable (in particular, I think it depends on which window is frontmost).
+///
+pub fn get_all_urls() -> Vec<String> {
+  let script = include_str!("scripts/list-open-tabs.scpt");
+  let output = run_applescript(&script);
+  if output.status.success() {
+    output.stdout.trim()
+                 .split(", ")
+                 .map(|url| urls::tidy_url(url))
+                 .filter(|url| url != "favorites://")
+                 .collect()
+  } else {
+    error!("Unexpected error from osascript: {:?}", output.stderr);
+  }
 }
 
 
