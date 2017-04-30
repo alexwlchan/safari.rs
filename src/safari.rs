@@ -29,7 +29,7 @@ pub fn is_safari_running() -> bool {
     .output()
     .expect("Unable to test if Safari is running.");
   for line in String::from_utf8(cmd_result.stdout).unwrap().lines() {
-    if line.ends_with("Safari.app/Contents/MacOS/Safari") {
+    if line.contains("Safari.app/Contents/MacOS/Safari") {
       return true
     }
   }
