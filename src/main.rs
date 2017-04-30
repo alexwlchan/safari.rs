@@ -45,4 +45,33 @@ fn main() {
       println!("{}", url);
     }
   }
+
+  if args.cmd_icloud_tabs {
+    if args.flag_list_devices {
+      for device in safari::list_icloud_tabs_devices() {
+        println!("{}", device);
+      }
+    } else {
+      let tab_data = safari::get_icloud_tabs_urls();
+      match args.flag_device {
+        Some(d) => {
+          match tab_data.get(&d) {
+            Some(urls) => {
+              for url in urls {
+                println!("{}", url);
+              }
+            },
+            None => (),
+          }
+        },
+        None => {
+          for urls in tab_data.values() {
+            for url in urls {
+              println!("{}", url);
+            }
+          }
+        }
+      }
+    }
+  }
 }
