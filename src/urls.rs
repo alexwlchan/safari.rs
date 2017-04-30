@@ -1,4 +1,20 @@
-use urlparse::{urlparse, urlunparse};
+use urlparse::{Query, parse_qs, urlparse, urlunparse};
+
+
+/// Re-encode a query string for Rust
+fn encode_querystring(query: Query) -> Option<String> {
+  let mut query_components: Vec<String> = vec![];
+  for (key, value) in query {
+    for v in value.iter() {
+      query_components.push(format!("{}={}", key, v));
+    }
+  }
+  if query_components.len() > 0 {
+    Some(query_components.join("&"))
+  } else {
+    None
+  }
+}
 
 
 /// Strip tracking junk and URL suffixes.
@@ -47,16 +63,10 @@ pub fn tidy_url(url: &str) -> String {
   // Remove &feature=youtu.be from YouTube URLs
   if parsed_url.netloc.ends_with("youtube.com") {
     parsed_url.query = match parsed_url.query {
-      Some(q) => {
-        let new_q = q
-          .replace("&feature=youtu.be", "")
-          .replace("feature=youtu.be&", "")
-          .replace("feature=youtu.be", "");
-        if new_q != "" {
-          Some(new_q)
-        } else {
-          None
-        }
+      Some(qs) => {
+        let mut query = parse_qs(&qs);
+        query.remove("feature");
+        encode_querystring(query)
       },
       None => None,
     };
