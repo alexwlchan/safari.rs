@@ -23,10 +23,10 @@ fn main() {
 
     if let Some(_) = matches.subcommand_matches("furl") {
         url = safari::safari_furl();
-        print!("{}", urls::tidy_url(url));
+        print!("{}", urls::tidy_url(&url));
     } else if let Some(_) = matches.subcommand_matches("2url") {
         url = safari::safari_2url();
-        print!("{}", urls::tidy_url(url));
+        print!("{}", urls::tidy_url(&url));
     } else if let Some(matches) = matches.subcommand_matches("clean-tabs") {
         // TODO: Tidy this up!!
         let urls = matches.args.get("urls").unwrap()
