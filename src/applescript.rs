@@ -1,8 +1,12 @@
-use std::process::Command;
+use std::process::{Command, ExitStatus};
 
 
+/// The output of a finished process.
+///
+/// This varies from Output in std::process in that stdout/stderr are
+/// both strings rather than Vec<u8>.
 pub struct Output {
-  pub status: i32,
+  pub status: ExitStatus,
   pub stdout: String,
   pub stderr: String,
 }
@@ -20,7 +24,7 @@ pub fn run(script: &str) -> Output {
     .expect("failed to execute AppleScript");
 
   Output {
-    status: cmd_result.status.code().unwrap_or(1),
+    status: cmd_result.status,
     stdout: String::from_utf8(cmd_result.stdout).unwrap(),
     stderr: String::from_utf8(cmd_result.stderr).unwrap(),
   }
