@@ -21,8 +21,10 @@ fn main() {
     let matches = app.get_matches();
 
     if let Some(_) = matches.subcommand_matches("furl") {
+      safari::assert_safari_is_running();
       print!("{}", safari::get_url(Some(1), None));
     } else if let Some(_) = matches.subcommand_matches("2url") {
+      safari::assert_safari_is_running();
       print!("{}", safari::get_url(Some(2), None));
     } else if let Some(matches) = matches.subcommand_matches("clean-tabs") {
       // TODO: Tidy this up!!
@@ -33,6 +35,7 @@ fn main() {
         .collect();
       safari::close_tabs(patterns);
     } else if let Some(_) = matches.subcommand_matches("list-tabs") {
+      safari::assert_safari_is_running();
       let urls = safari::get_all_urls();
       for url in urls {
         println!("{}", url);
