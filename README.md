@@ -4,24 +4,35 @@ safari provides some tools for interacting with Safari.
 
 ## Commands
 
-1.  Get the URL of the frontmost tab:
+1.  Get the URL from a given window or tab:
 
     ```console
-    $ safari furl
-    http://aromantic.wikia.com/wiki/Alterous⏎
+    $ # Get the URL of the frontmost tab of the frontmost window
+    $ safari url
+    https://github.com
+
+    $ # Get a URL from the second window from the tab
+    $ safari url --window=2
+    https://example.com/foo
+
+    $ # Third tab from the left of the second window
+    $ safari url --window=2 --tab=3
+    https://example.com/foo
     ```
 
-2.  Get the URL of the front tab in window 2:
+    I have the first two commands bound to shortcuts `furl` and `2url` for quick access.
+
+2.  Get a list of URLs from every open tab:
 
     ```console
-    $ safari 2url
-    http://stackoverflow.com/questions/39775060/reverse-iterating-over-a-vec-versus-vec-iter#39775142⏎
+    $ safari urls-all
+    https://github.com
+    https://example.com/foo
+    https://crates.io/crates/urlparse
+    ...
     ```
 
-    This is useful if you have two Safari windows open, and you want to
-    copy the URL from one window into a form in another.
-
-3.  Close tabs containing certain URLs:
+3.  Go through and batch close tabs:
 
     ```console
     $ safari clean-tabs youtube.com,twitter.com
@@ -29,23 +40,13 @@ safari provides some tools for interacting with Safari.
 
     I find this useful for quickly cutting down my open tabs.
 
-4.  List the tabs that are open in every window:
-
-    ```console
-    $ safari list-tabs
-    https://github.com/alexwlchan/ao3
-    https://www.susanjfowler.com/blog/2017/2/19/reflecting-on-one-very-strange-year-at-uber
-    https://github.com/Keats/tera
-    https://crates.io/crates/tera
-    ```
-
-5.  List the URLs in Safari Reading List:
+4.  Get a list of URLs from Reading List:
 
     ```console
     $ safari reading-list
     ```
 
-### Installation
+## Installation
 
 You need [Rust installed][rust].  Then clone the repository and run
 `cargo install`:
@@ -54,23 +55,22 @@ You need [Rust installed][rust].  Then clone the repository and run
 $ cargo install --git https://github.com/alexwlchan/safari.rs
 ```
 
-I originally developed this against Rust 1.15.0.
+Tested against Rust 1.17.0
 
 [rust]: https://www.rust-lang.org/en-US/install.html
 
-### URL transformations
+## URL transformations
 
-The `furl` and `2url` tabs will do a bit of cleaning before they return
-the URL:
+The commands that produce URLs do a bit of cleaning before they return:
 
 *   Twitter links to the mobile site (`mobile.twitter.com`) are flipped to
     point to the desktop site (`twitter.com`).
 *   Tracking data is partially stripped from Amazon, Buzzfeed, Mashable and
     Medium URLs.
 *   The `#notes` fragment is removed from Tumblr URLs.
-*   Everything except the `?v=` query parameter is removed from YouTube URLs.
+*   The `feature=youtu.be` query parameter is removed from YouTube URLs.
 
-### Motivation
+## Motivation
 
 I first got the idea for a script to access Safari URLs [from Dr. Drang][dr].
 I've been through several different versions – AppleScript, shell, Python –
