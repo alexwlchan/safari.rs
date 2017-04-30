@@ -5,6 +5,7 @@ Usage: <NAME> url [--window=<WINDOW> [--tab=<TAB>]]
        <NAME> urls-all
        <NAME> close-tabs <urls-to-close>
        <NAME> reading-list
+       <NAME> icloud-tabs [--list-devices | --device=<DEVICE>]
        <NAME> (-h | --help)
        <NAME> --version
 
@@ -15,12 +16,16 @@ Options:
                         frontmost window, 2 for the second window, and so on.
     --tab=<TAB>         Which tab to choose a URL from.  Use 1 for the leftmost
                         tab, 2 for second-from-left, and so on.
+    --list-devices      Get a list of all the devices known to iCloud Tabs.
+    --device=<DEVICE>   Only get iCloud URLs for this device.
 
 Commands:
     url           Print a URL from an open Safari tab.
     urls-all      Prints a list of URLs from every open Safari tab.
     close-tabs    Close any tabs with the given URLs.
     reading-list  Print a list of URLs from Reading List.
+    icloud-tabs   Get a list of URLs from iCloud Tabs.  Default is to list URLs
+                  from every device, or you can filter with the --device flag.
 ";
 
 #[derive(Debug, RustcDecodable)]
@@ -28,10 +33,13 @@ pub struct Args {
   pub cmd_url: bool,
   pub cmd_urls_all: bool,
   pub cmd_close_tabs: bool,
+  pub cmd_icloud_tabs: bool,
   pub cmd_reading_list: bool,
   pub flag_window: Option<i32>,
   pub flag_tab: Option<i32>,
   pub flag_version: bool,
+  pub flag_list_devices: bool,
+  pub flag_device: Option<String>,
   pub arg_urls_to_close: String,
 }
 

@@ -46,6 +46,18 @@ safari provides some tools for interacting with Safari.
     $ safari reading-list
     ```
 
+5.  Get a list of URLs from all your devices with iCloud Tabs:
+
+    ```console
+    $ safari icloud-tabs
+    ```
+
+    You can get a list of known devices with `icloud-tabs --list-devices`, and filter the URLs with the `--device` flag:
+
+    ```console
+    $ safari icloud-tabs --device="Alex's iPhone"
+    ```
+
 ## Installation
 
 You need [Rust installed][rust].  Then clone the repository and run
@@ -86,6 +98,6 @@ Why Rust?
 
 [dr]: http://www.leancrew.com/all-this/2009/07/safari-tab-urls-via-textexpander/
 
-### License
+## License
 
 MIT license.
