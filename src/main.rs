@@ -4,6 +4,7 @@ extern crate docopt;
 extern crate plist;
 extern crate rustc_serialize;
 extern crate tera;
+extern crate urlencoding;
 extern crate urlparse;
 
 mod applescript;

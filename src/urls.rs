@@ -1,4 +1,22 @@
+use urlencoding::{encode as urlencode};
 use urlparse::{Query, parse_qs, urlparse, urlunparse};
+
+
+fn partial_urlencode(value: &str) -> String {
+  // The urlencode from the urlencoding library goes further than I like,
+  // and also URL encodes ASCII digits. Reverse that stuff.
+  urlencode(value)
+    .replace("%30", "0")
+    .replace("%31", "1")
+    .replace("%32", "2")
+    .replace("%33", "3")
+    .replace("%34", "4")
+    .replace("%35", "5")
+    .replace("%36", "6")
+    .replace("%37", "7")
+    .replace("%38", "8")
+    .replace("%39", "9")
+}
 
 
 /// Re-encode a query string for Rust
@@ -6,7 +24,7 @@ fn encode_querystring(query: Query) -> Option<String> {
   let mut query_components: Vec<String> = vec![];
   for (key, value) in query {
     for v in value.iter() {
-      query_components.push(format!("{}={}", key, v));
+      query_components.push(format!("{}={}", key, partial_urlencode(v)));
     }
   }
   if query_components.len() > 0 {
@@ -169,5 +187,15 @@ tidy_url_tests! {
   multiple_utm_tracker_with_others: (
     "https://example.com?utm_medium=social&foo=bar&utm_source=twitter",
     "https://example.com?foo=bar",
+  ),
+
+  url_with_spaces: (
+    "https://example.com?foo=bar%20baz",
+    "https://example.com?foo=bar%20baz"
+  ),
+
+  url_with_numerals: (
+    "https://example.com?foo=bar0baz",
+    "https://example.com?foo=bar0baz"
   ),
 }
