@@ -32,7 +32,7 @@ macro_rules! error(
 ///              frontmost window.
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
-pub fn get_safari_url(window: Option<i32>, tab: Option<i32>) -> String {
+pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {
@@ -57,36 +57,83 @@ pub fn get_safari_url(window: Option<i32>, tab: Option<i32>) -> String {
 }
 
 
-pub fn safari_furl() -> String {
-    get_safari_url(Some(1), None)
+/// Return a list of URLs from Safari.
+///
+/// This returns a list of URLs, one for every tab in Safari.  Iteration
+/// order depends on AppleScript, which I don't think is guaranteed to be
+/// stable (in particular, I think it depends on which window is frontmost).
+///
+pub fn get_all_urls() -> Vec<String> {
+  let script = include_str!("scripts/list-open-tabs.scpt");
+  let output = run_applescript(&script);
+  if output.status.success() {
+    output.stdout.trim()
+                 .split(", ")
+                 .map(|url| urls::tidy_url(url))
+                 .filter(|url| url != "favorites://")
+                 .collect()
+  } else {
+    error!("Unexpected error from osascript: {:?}", output.stderr);
+  }
 }
 
 
-pub fn safari_2url() -> String {
-    get_safari_url(Some(2), None)
+/// Convert URL patterns into AppleScript conditions.
+///
+/// These conditions can be used in an `if` statement in AppleScript to
+/// decide whether a tab should be closed.  Three patterns are supported,
+/// a limited regex syntax:
+///
+///     example.com             matches anywhere in the URL
+///     ^http://examples.com    matches at the start of the URL
+///     example.com/$           matches at the end of the URL
+///
+fn parse_conditions(url_patterns: Vec<&str>) -> Vec<String> {
+  url_patterns.iter().map(|p|
+    if p.starts_with("^") {
+      format!("starts with \"{}\"", p.replace("^", ""))
+    } else if p.ends_with("$") {
+      format!("ends with \"{}\"", p.replace("$", ""))
+    } else {
+      format!("contains \"{}\"", p)
+    }
+  ).collect()
 }
 
 
-pub fn safari_closetabs(urls: Vec<&str>) -> String {
-    let clean_tabs_template = include_str!("scripts/clean-tabs.scpt");
+/// Tests for parse_conditions().
+#[cfg(test)]
+mod tests {
+  use safari::parse_conditions;
 
-    let mut context = Context::new();
-    context.add("urls", &urls);
-
-    let script = Tera::one_off(&clean_tabs_template, context, false).unwrap();
-    run_applescript(&script).stdout
+  #[test]
+  fn test_parse_conditions() {
+    let patterns = vec!["github.com", "^facebook.com", "twitter.com$"];
+    let expected = vec!["contains \"github.com\"", "starts with \"facebook.com\"", "ends with \"twitter.com\""];
+    let actual = parse_conditions(patterns);
+    assert_eq!(actual, expected);
+  }
 }
 
 
-/// Prints a list of open tabs in Safari
-pub fn list_open_tabs() -> String {
-    let list_open_tabs_template = include_str!("scripts/list-open-tabs.scpt");
+/// Close tabs in Safari that match URL patterns.
+///
+/// Takes a list of URL patterns, and tries to close any matching Safari tabs.
+/// Bugginess in AppleScript means this isn't always perfect, but we can
+/// have a go.  In general it will fail to close tabs, rather than close
+/// the wrong tabs.
+///
+pub fn close_tabs(url_patterns: Vec<&str>) {
+  let conditions = parse_conditions(url_patterns);
 
-    let context = Context::new();
-    let script = Tera::one_off(&list_open_tabs_template,
-                               context,
-                               false).unwrap();
-    run_applescript(&script).stdout
+  let clean_tabs_template = include_str!("scripts/clean-tabs.scpt");
+  let mut context = Context::new();
+  context.add("conditions", &conditions);
+  let script = Tera::one_off(&clean_tabs_template, context, false).unwrap();
+
+  // Run it twice to get around weird AppleScript bugs.
+  run_applescript(&script);
+  run_applescript(&script);
 }
 
 

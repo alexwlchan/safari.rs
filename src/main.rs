@@ -21,20 +21,22 @@ fn main() {
     let matches = app.get_matches();
 
     if let Some(_) = matches.subcommand_matches("furl") {
-      print!("{}", safari::safari_furl());
+      print!("{}", safari::get_url(Some(1), None));
     } else if let Some(_) = matches.subcommand_matches("2url") {
-      print!("{}", safari::safari_2url());
+      print!("{}", safari::get_url(Some(2), None));
     } else if let Some(matches) = matches.subcommand_matches("clean-tabs") {
-        // TODO: Tidy this up!!
-        let urls = matches.args.get("urls").unwrap()
-                          .vals.get(1).unwrap()
-                          .to_str().unwrap()
-                          .split(",")
-                          .collect();
-        safari::safari_closetabs(urls);
+      // TODO: Tidy this up!!
+      let patterns = matches.args.get("urls").unwrap()
+        .vals.get(1).unwrap()
+        .to_str().unwrap()
+        .split(",")
+        .collect();
+      safari::close_tabs(patterns);
     } else if let Some(_) = matches.subcommand_matches("list-tabs") {
-        let result = safari::list_open_tabs();
-        println!("{}", result);
+      let urls = safari::get_all_urls();
+      for url in urls {
+        println!("{}", url);
+      }
     } else if let Some(_) = matches.subcommand_matches("reading-list") {
         safari::reading_list();
     } else {
