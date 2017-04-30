@@ -24,7 +24,7 @@ macro_rules! error(
 
 /// Returns true/false if Safari is running.
 pub fn is_safari_running() -> bool {
-  let cmd_result = Command::new("ps")
+  let cmd_result = process::Command::new("ps")
     .arg("-eaf")
     .output()
     .expect("Unable to test if Safari is running.");
