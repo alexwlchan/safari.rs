@@ -95,6 +95,7 @@ pub fn get_all_urls() -> Vec<String> {
                  .split(", ")
                  .map(|url| urls::tidy_url(url))
                  .filter(|url| url != "favorites://")
+                 .filter(|url| url != "://missing value")
                  .collect()
   } else {
     error!("Unexpected error from osascript: {:?}", output.stderr);

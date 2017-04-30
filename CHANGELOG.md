@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.1 (2017-04-30)
+
+*   Bugfix: don't include `://missing value` in the list of currently open Safari tabs.
+
 ## v2.0.0 (2017-04-30)
 
 *   A near-complete rewrite that overhauls the command-line parsing, improves the interface, and has better error reporting.
