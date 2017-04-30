@@ -6,6 +6,7 @@ dependencies = [
  "plist 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "tera 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "urlencoding 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "urlparse 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -361,6 +362,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "urlencoding"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "urlparse"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -440,6 +446,7 @@ dependencies = [
 "checksum unidecode 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d2adb95ee07cd579ed18131f2d9e7a17c25a4b76022935c7f2460d2bfae89fd2"
 "checksum unreachable 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1f2ae5ddb18e1c92664717616dd9549dde73f539f01bd7b77c2edb2446bdff91"
 "checksum url 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f5ba8a749fb4479b043733416c244fa9d1d3af3d7c23804944651c8a448cb87e"
+"checksum urlencoding 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2efeddd37779aad98b8c4f0dd6b885b5cddd893ddd3b30d0b9b647296be0d276"
 "checksum urlparse 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)" = "110352d4e9076c67839003c7788d8604e24dcded13e0b375af3efaa8cf468517"
 "checksum utf8-ranges 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "662fab6525a98beff2921d7f61a39e7d59e0b425ebc7d0d9e66d316e55124122"
 "checksum void 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
