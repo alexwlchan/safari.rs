@@ -10,6 +10,7 @@ use std::process;
 
 use clap::App;
 
+mod applescript;
 mod safari;
 mod urls;
 

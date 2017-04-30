@@ -1,7 +1,8 @@
 use std::env;
 use std::fs::File;
 use std::process;
-use std::process::Command;
+
+use applescript::{run as run_applescript};
 
 use plist::Plist;
 
@@ -9,12 +10,12 @@ use tera::{Context, Tera};
 
 
 pub fn safari_furl() -> String {
-    run_applescript("tell application \"Safari\" to get URL of document 1")
+    run_applescript("tell application \"Safari\" to get URL of document 1").stdout
 }
 
 
 pub fn safari_2url() -> String {
-    run_applescript("tell application \"Safari\" to get URL of document 2")
+    run_applescript("tell application \"Safari\" to get URL of document 2").stdout
 }
 
 
@@ -25,7 +26,7 @@ pub fn safari_closetabs(urls: Vec<&str>) -> String {
     context.add("urls", &urls);
 
     let script = Tera::one_off(&clean_tabs_template, context, false).unwrap();
-    run_applescript(&script)
+    run_applescript(&script).stdout
 }
 
 
@@ -37,7 +38,7 @@ pub fn list_open_tabs() -> String {
     let script = Tera::one_off(&list_open_tabs_template,
                                context,
                                false).unwrap();
-    run_applescript(&script)
+    run_applescript(&script).stdout
 }
 
 
@@ -98,24 +99,4 @@ pub fn reading_list() {
                                .as_string().unwrap());
         }
     }
-}
-
-
-/// Runs an AppleScript and returns the stdout.
-fn run_applescript(script: &str) -> String {
-    let cmd_output = Command::new("osascript")
-        .arg("-e")
-        .arg(script)
-        .output()
-        .expect("failed to execute AppleScript");
-
-    // Strip the trailing newline and return a String
-    let mut output = cmd_output.stdout;
-
-    // AppleScript sends `log` calls to stderr, obviously.
-    if output.len() == 0 {
-        output = cmd_output.stderr;
-    }
-    output.pop();
-    String::from_utf8(output).unwrap()
 }
