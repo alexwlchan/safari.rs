@@ -6,7 +6,7 @@ tell application "Safari"
       -- tab N was already closed -- error!
       --
       -- For safety, we just catch and discard all errors.
-      {% for condition in conditionss %}
+      {% for condition in conditions %}
       try
         tell t
           if (URL {{ condition}}) then close
