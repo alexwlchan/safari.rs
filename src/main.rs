@@ -19,14 +19,11 @@ fn main() {
     let yaml = load_yaml!("cli.yml");
     let app = App::from_yaml(yaml).usage("furl <subcommand>");
     let matches = app.get_matches();
-    let url: String;
 
     if let Some(_) = matches.subcommand_matches("furl") {
-        url = safari::safari_furl();
-        print!("{}", urls::tidy_url(url));
+      print!("{}", safari::safari_furl());
     } else if let Some(_) = matches.subcommand_matches("2url") {
-        url = safari::safari_2url();
-        print!("{}", urls::tidy_url(url));
+      print!("{}", safari::safari_2url());
     } else if let Some(matches) = matches.subcommand_matches("clean-tabs") {
         // TODO: Tidy this up!!
         let urls = matches.args.get("urls").unwrap()

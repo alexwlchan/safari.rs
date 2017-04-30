@@ -2,7 +2,7 @@ use urlparse::{urlparse, urlunparse};
 
 
 /// Strip tracking junk and URL suffixes.
-pub fn tidy_url(url: String) -> String {
+pub fn tidy_url(url: &str) -> String {
     let mut parsed_url = urlparse(url);
 
     // Always get the desktop version of Twitter URLs
@@ -72,7 +72,7 @@ macro_rules! tidy_url_tests {
         #[test]
         fn $name() {
             let (input, expected) = $value;
-            assert_eq!(expected, tidy_url(String::from(input)));
+            assert_eq!(expected, tidy_url(input));
         }
     )*
     }
