@@ -170,4 +170,14 @@ tidy_url_tests! {
     "https://example.com?utm_medium=social&foo=bar&utm_source=twitter",
     "https://example.com?foo=bar",
   ),
+
+  url_with_spaces: (
+    "https://example.com?foo=bar%20baz",
+    "https://example.com?foo=bar%20baz"
+  ),
+
+  url_with_numerals: (
+    "https://example.com?foo=bar0baz",
+    "https://example.com?foo=bar0baz"
+  ),
 }
