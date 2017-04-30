@@ -137,61 +137,107 @@ pub fn close_tabs(url_patterns: Vec<&str>) {
 }
 
 
-/// Prints a list of tabs in Reading List
-pub fn reading_list() {
-    let mut plist_path = env::home_dir().unwrap();
-    plist_path.push("Library/Safari/Bookmarks.plist");
-    let file = File::open(plist_path).unwrap();
-    let plist = Plist::read(file).unwrap();
+/// Get the Bookmarks.plist dict for a given title
+fn read_bookmarks_plist(title: &str) -> Plist {
 
-    let data = match plist {
-        Plist::Dictionary(dict) => dict,
-        _ => {
-            println!("Unable to parse ~/Library/Safari/Bookmarks.plist");
-            process::exit(1);
-        }
-    };
+  // All Safari data lives at ~/Library/Safari/Bookmarks.plist
+  // TODO: There's probably a more idiomatic Rust-like way to write this.
+  let mut plist_path = match env::home_dir() {
+    Some(v) => v,
+    None => error!("Unable to get path to Bookmarks.plist?"),
+  };
+  plist_path.push("Library/Safari/Bookmarks.plist");
 
-    // The structure of Bookmarks.plist is as follows:
-    //
-    //     <dict>
-    //       <key>Children</key>
-    //       <array>
-    //         <dict>
-    //           <key>Title</key><string>History</string>
-    //           ... dict data ...
-    //         </dict>
-    //         <dict>
-    //           <key>Title</key><string>com.apple.ReadingList</string>
-    //           ... dict data ...
-    //         </dict>
-    //         ... other array items ...
-    //       </array>
-    //     </dict>
-    //
-    // We're interested in the dict with title 'com.apple.ReadingList'.
-    let children = data.get("Children").unwrap();
-    for child in children.as_array().unwrap().iter() {
+  let file = match File::open(plist_path) {
+    Ok(v) => v,
+    Err(e) => error!("Unable to open ~/Library/Safari/Bookmarks.plist: {:?}", e),
+  };
 
-        // There might be a more Rust-idiomatic way to get to the <dict>
-        // we want, but this seems to work.
-        let child_dict = match child.as_dictionary() {
-            Some(d) => d,
-            None => continue,
-        };
-        match child_dict.get("Title") {
-            Some(d) => {
-                if d.as_string().unwrap() != "com.apple.ReadingList" {
-                    continue
-                }
-            },
-            None => continue,
-        }
-        let rl_items = child_dict.get("Children").unwrap();
-        for item in rl_items.as_array().unwrap().iter() {
-            println!("{}", item.as_dictionary().unwrap()
-                               .get("URLString").unwrap()
-                               .as_string().unwrap());
-        }
+  let plist = match Plist::read(file) {
+    Ok(v) => v,
+    Err(e) => error!("Unable to read ~/Library/Safari/Bookmarks.plist: {:?}", e),
+  };
+
+  let data = match plist.as_dictionary() {
+    Some(v) => v,
+    None => error!("Unable to parse ~/Library/Safari/Bookmarks.plist as dictionary?"),
+  };
+
+  // The structure of Bookmarks.plist is as follows:
+  //
+  //     <dict>
+  //       <key>Children</key>
+  //       <array>
+  //         <dict>
+  //           <key>Title</key><string>History</string>
+  //           ... dict data ...
+  //         </dict>
+  //         <dict>
+  //           <key>Title</key><string>com.apple.ReadingList</string>
+  //           ... dict data ...
+  //         </dict>
+  //         ... other array items ...
+  //       </array>
+  //     </dict>
+  //
+  let children = match data.get("Children") {
+    Some(child_key) => match child_key.as_array() {
+      Some(v) => v,
+      None => error!("Top-level children key in ~/Library/Safari/Bookmarks.plist isn't an array?"),
+    },
+    None => error!("Unable to find top-level Children key in ~/Library/Safari/Bookmarks.plist"),
+  };
+
+  let mut matching_children = children.iter().filter(|d|
+    match d.as_dictionary() {
+      Some(dict) => match dict.get("Title") {
+        Some(title_elem) => match title_elem.as_string() {
+          Some(v) => (v == title),
+          None => false,
+        },
+        None => false,
+      },
+      None => false,
     }
+  );
+
+  // Check we got one, and only one result.
+  let result = match matching_children.next() {
+    Some(v) => v,
+    None => error!("Unable to find key {} in Bookmarks.plist", title),
+  };
+
+  match matching_children.next() {
+    Some(_) => error!("Got more than one result for {} in Bookmarks.plist", title),
+    None => {},
+  };
+
+  result.to_owned()
+}
+
+
+/// Return a list of URLs from Reading List.
+///
+/// Iteration order depends on the order in which they're stored in
+/// Bookmarks.plist, which is usually (but not guaranteed to be) newest first.
+///
+pub fn get_reading_list_urls() -> Vec<String> {
+  let plist = read_bookmarks_plist("com.apple.ReadingList");
+
+  // TODO: All these unwrap() calls should probably be handled better
+  let children = plist
+    .as_dictionary().unwrap()
+    .get("Children").unwrap()
+    .as_array().unwrap();
+
+  children
+    .iter()
+    .map(|child|
+      child
+        .as_dictionary().unwrap()
+        .get("URLString").unwrap()
+        .as_string().unwrap()
+    )
+    .map(|url| urls::tidy_url(url))
+    .collect()
 }

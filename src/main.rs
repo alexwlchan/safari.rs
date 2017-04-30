@@ -38,7 +38,10 @@ fn main() {
         println!("{}", url);
       }
     } else if let Some(_) = matches.subcommand_matches("reading-list") {
-        safari::reading_list();
+      let urls = safari::get_reading_list_urls();
+      for url in urls {
+        println!("{}", url);
+      }
     } else {
         App::from_yaml(yaml)
             .usage("furl <subcommand>")
