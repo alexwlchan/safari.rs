@@ -1,6 +1,6 @@
 # safari.rs
 
-safari provides some tools for interacting with Safari.
+safari.rs provides some tools for interacting with Safari on the command-line.
 
 ## Commands
 
@@ -60,14 +60,14 @@ safari provides some tools for interacting with Safari.
 
 ## Installation
 
-You need [Rust installed][rust].  Then clone the repository and run
-`cargo install`:
+You need [Rust installed][rust].
+Then to install:
 
 ```console
 $ cargo install --git https://github.com/alexwlchan/safari.rs
 ```
 
-Tested against Rust 1.17.0
+Tested with Rust 1.17.0
 
 [rust]: https://www.rust-lang.org/en-US/install.html
 
