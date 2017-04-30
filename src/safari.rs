@@ -1,5 +1,6 @@
 use std::env;
 use std::fs::File;
+use std::io::Write;
 use std::process;
 
 use applescript::{run as run_applescript};
@@ -8,14 +9,61 @@ use plist::Plist;
 
 use tera::{Context, Tera};
 
+use urls;
+
+
+// http://stackoverflow.com/a/27590832/1558022
+macro_rules! error(
+    ($($arg:tt)*) => { {
+        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
+        r.expect("failed printing to stderr");
+        process::exit(1);
+    } }
+);
+
+
+/// Return a URL from a Safari window.
+///
+/// Given a (window, tab) pair, this function looks up the URL of the tab.
+/// Note that it doesn't do any error handling, so will throw an execution
+/// error if it fails.
+///
+/// * `window` - Window index.  1 is frontmost.  If None, assumes the
+///              frontmost window.
+/// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
+///
+pub fn get_safari_url(window: Option<i32>, tab: Option<i32>) -> String {
+  // If a tab isn't specified, assume the user wants the frontmost tab.
+  let command = match window {
+    Some(w_idx) => {
+      match tab {
+        Some(t_idx) => format!("tell application \"Safari\" to get tab {} of window {}", t_idx, w_idx),
+        None => format!("tell application \"Safari\" to get URL of document {}", w_idx),
+      }
+    },
+    None => "tell application \"Safari\" to get URL of document 1".to_string(),
+  };
+  let output = run_applescript(&command);
+
+  if output.status.success() {
+    urls::tidy_url(output.stdout.trim())
+  } else {
+    if output.stderr.contains("Invalid index") {
+      error!("Invalid index: no such window or tab.");
+    } else {
+      error!("Unexpected error from osascript: {:?}", output.stderr);
+    }
+  }
+}
+
 
 pub fn safari_furl() -> String {
-    run_applescript("tell application \"Safari\" to get URL of document 1").stdout
+    get_safari_url(Some(1), None)
 }
 
 
 pub fn safari_2url() -> String {
-    run_applescript("tell application \"Safari\" to get URL of document 2").stdout
+    get_safari_url(Some(2), None)
 }
 
 
