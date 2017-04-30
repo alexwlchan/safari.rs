@@ -32,7 +32,7 @@ macro_rules! error(
 ///              frontmost window.
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
-pub fn get_safari_url(window: Option<i32>, tab: Option<i32>) -> String {
+pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {
@@ -54,16 +54,6 @@ pub fn get_safari_url(window: Option<i32>, tab: Option<i32>) -> String {
       error!("Unexpected error from osascript: {:?}", output.stderr);
     }
   }
-}
-
-
-pub fn safari_furl() -> String {
-    get_safari_url(Some(1), None)
-}
-
-
-pub fn safari_2url() -> String {
-    get_safari_url(Some(2), None)
 }
 
 
