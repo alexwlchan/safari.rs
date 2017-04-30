@@ -1,4 +1,20 @@
-use urlparse::{urlparse, urlunparse};
+use urlparse::{Query, parse_qs, urlparse, urlunparse};
+
+
+/// Re-encode a query string for Rust
+fn encode_querystring(query: Query) -> Option<String> {
+  let mut query_components: Vec<String> = vec![];
+  for (key, value) in query {
+    for v in value.iter() {
+      query_components.push(format!("{}={}", key, v));
+    }
+  }
+  if query_components.len() > 0 {
+    Some(query_components.join("&"))
+  } else {
+    None
+  }
+}
 
 
 /// Strip tracking junk and URL suffixes.
@@ -47,20 +63,31 @@ pub fn tidy_url(url: &str) -> String {
   // Remove &feature=youtu.be from YouTube URLs
   if parsed_url.netloc.ends_with("youtube.com") {
     parsed_url.query = match parsed_url.query {
-      Some(q) => {
-        let new_q = q
-          .replace("&feature=youtu.be", "")
-          .replace("feature=youtu.be&", "")
-          .replace("feature=youtu.be", "");
-        if new_q != "" {
-          Some(new_q)
-        } else {
-          None
-        }
+      Some(qs) => {
+        let mut query = parse_qs(&qs);
+        query.remove("feature");
+        encode_querystring(query)
       },
       None => None,
     };
   }
+
+  // Remove any UTM tracking parameters from URLs
+  parsed_url.query = match parsed_url.query {
+    Some(qs) => {
+      let mut query = parse_qs(&qs);
+      let utm_keys: Vec<_> = query
+        .keys()
+        .filter(|key| key.starts_with("utm_"))
+        .map(|k| k.clone())
+        .collect();
+      for key in utm_keys {
+        query.remove(&key);
+      }
+      encode_querystring(query)
+    },
+    None => None
+  };
 
   urlunparse(parsed_url)
 }
@@ -127,5 +154,20 @@ tidy_url_tests! {
   youtube_channel: (
     "https://www.youtube.com/user/TheQIElves",
     "https://www.youtube.com/user/TheQIElves"
+  ),
+
+  single_utm_tracker: (
+    "https://example.com?utm_medium=social",
+    "https://example.com",
+  ),
+
+  multiple_utm_tracker: (
+    "https://example.com?utm_medium=social&utm_source=twitter",
+    "https://example.com",
+  ),
+
+  multiple_utm_tracker_with_others: (
+    "https://example.com?utm_medium=social&foo=bar&utm_source=twitter",
+    "https://example.com?foo=bar",
   ),
 }
