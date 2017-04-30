@@ -57,17 +57,6 @@ pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
 }
 
 
-pub fn safari_closetabs(urls: Vec<&str>) -> String {
-    let clean_tabs_template = include_str!("scripts/clean-tabs.scpt");
-
-    let mut context = Context::new();
-    context.add("urls", &urls);
-
-    let script = Tera::one_off(&clean_tabs_template, context, false).unwrap();
-    run_applescript(&script).stdout
-}
-
-
 /// Return a list of URLs from Safari.
 ///
 /// This returns a list of URLs, one for every tab in Safari.  Iteration
@@ -86,6 +75,65 @@ pub fn get_all_urls() -> Vec<String> {
   } else {
     error!("Unexpected error from osascript: {:?}", output.stderr);
   }
+}
+
+
+/// Convert URL patterns into AppleScript conditions.
+///
+/// These conditions can be used in an `if` statement in AppleScript to
+/// decide whether a tab should be closed.  Three patterns are supported,
+/// a limited regex syntax:
+///
+///     example.com             matches anywhere in the URL
+///     ^http://examples.com    matches at the start of the URL
+///     example.com/$           matches at the end of the URL
+///
+fn parse_conditions(url_patterns: Vec<&str>) -> Vec<String> {
+  url_patterns.iter().map(|p|
+    if p.starts_with("^") {
+      format!("starts with \"{}\"", p.replace("^", ""))
+    } else if p.ends_with("$") {
+      format!("ends with \"{}\"", p.replace("$", ""))
+    } else {
+      format!("contains \"{}\"", p)
+    }
+  ).collect()
+}
+
+
+/// Tests for parse_conditions().
+#[cfg(test)]
+mod tests {
+  use safari::parse_conditions;
+
+  #[test]
+  fn test_parse_conditions() {
+    let patterns = vec!["github.com", "^facebook.com", "twitter.com$"];
+    let expected = vec!["contains \"github.com\"", "starts with \"facebook.com\"", "ends with \"twitter.com\""];
+    let actual = parse_conditions(patterns);
+    assert_eq!(actual, expected);
+  }
+}
+
+
+/// Close tabs in Safari that match URL patterns.
+///
+/// Takes a list of URL patterns, and tries to close any matching Safari tabs.
+/// Bugginess in AppleScript means this isn't always perfect, but we can
+/// have a go.  In general it will fail to close tabs, rather than close
+/// the wrong tabs.
+///
+pub fn close_tabs(url_patterns: Vec<&str>) {
+  let conditions = parse_conditions(url_patterns);
+
+  let clean_tabs_template = include_str!("scripts/clean-tabs.scpt");
+  let mut context = Context::new();
+  context.add("conditions", &conditions);
+  let script = Tera::one_off(&clean_tabs_template, context, false).unwrap();
+
+  // Run it twice to get around weird AppleScript bugs.
+  run_applescript(&script);
+  run_applescript(&script);
 }
 
 
