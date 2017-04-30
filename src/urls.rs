@@ -1,4 +1,4 @@
-use urlparse::{GetQuery, urlparse, urlunparse};
+use urlparse::{urlparse, urlunparse};
 
 
 /// Strip tracking junk and URL suffixes.
@@ -44,15 +44,25 @@ pub fn tidy_url(url: String) -> String {
         parsed_url.fragment = new_fragment;
     }
 
-    // Remove &feature=youtu.be from YouTube URLs
-    // TODO: What does this do with the timestamp URL fragment?
-    if parsed_url.netloc.ends_with("youtube.com") {
-        let query = parsed_url.get_parsed_query().unwrap();
-        let video_id = query.get_first_from_str("v").unwrap();
-        parsed_url.query = Some(String::from("v=".to_string() + &video_id));
-    }
+  // Remove &feature=youtu.be from YouTube URLs
+  if parsed_url.netloc.ends_with("youtube.com") {
+    parsed_url.query = match parsed_url.query {
+      Some(q) => {
+        let new_q = q
+          .replace("&feature=youtu.be", "")
+          .replace("feature=youtu.be&", "")
+          .replace("feature=youtu.be", "");
+        if new_q != "" {
+          Some(new_q)
+        } else {
+          None
+        }
+      },
+      None => None,
+    };
+  }
 
-    urlunparse(parsed_url)
+  urlunparse(parsed_url)
 }
 
 
@@ -81,11 +91,6 @@ tidy_url_tests! {
     url_md_0:  ("https://medium.com/@anildash/forget-why-its-time-to-get-to-work-c49ac5f0da20#.sjyskxdsz",
                 "https://medium.com/@anildash/forget-why-its-time-to-get-to-work-c49ac5f0da20"),
 
-    url_yt_0:  ("https://www.youtube.com/watch?v=tJkEV3fvQUU",
-                "https://www.youtube.com/watch?v=tJkEV3fvQUU"),
-    url_yt_1:  ("https://www.youtube.com/watch?v=I4LVAu0pxHc&feature=youtu.be",
-                "https://www.youtube.com/watch?v=I4LVAu0pxHc"),
-
     url_tm_0:  ("http://azurelunatic.tumblr.com/post/155525051123/things-about-hufflepuffs-539#notes",
                 "http://azurelunatic.tumblr.com/post/155525051123/things-about-hufflepuffs-539"),
 
@@ -93,4 +98,34 @@ tidy_url_tests! {
               "https://www.buzzfeed.com/katienotopoulos/the-end-of-apple-man"),
     url_9:   ("http://mashable.com/2016/03/21/apple-liam-recycling-robot/#b9y4lv3m4qqX",
               "http://mashable.com/2016/03/21/apple-liam-recycling-robot/"),
+
+  youtube_plain_video: (
+    "https://www.youtube.com/watch?v=zB4I68XVPzQ",
+    "https://www.youtube.com/watch?v=zB4I68XVPzQ",
+  ),
+
+  youtube_with_timestamp: (
+    "https://www.youtube.com/watch?v=D68cUzqcTrg&feature=youtu.be#t=1m",
+    "https://www.youtube.com/watch?v=D68cUzqcTrg#t=1m",
+  ),
+
+  youtube_with_trailing_feature: (
+    "https://www.youtube.com/watch?v=PbJqNa0_Oz0&feature=youtu.be",
+    "https://www.youtube.com/watch?v=PbJqNa0_Oz0",
+  ),
+
+  youtube_with_leading_feature: (
+    "https://www.youtube.com/watch?feature=youtu.be&v=oPo4n9tBPsk",
+    "https://www.youtube.com/watch?v=oPo4n9tBPsk",
+  ),
+
+  youtube_with_only_feature: (
+    "https://www.youtube.com/watch?feature=youtu.be",
+    "https://www.youtube.com/watch",
+  ),
+
+  youtube_channel: (
+    "https://www.youtube.com/user/TheQIElves",
+    "https://www.youtube.com/user/TheQIElves"
+  ),
 }
