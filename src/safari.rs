@@ -1,3 +1,4 @@
+use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::fs::File;
 use std::io::Write;
@@ -167,7 +168,7 @@ fn read_bookmarks_plist(title: &str) -> Plist {
   // TODO: There's probably a more idiomatic Rust-like way to write this.
   let mut plist_path = match env::home_dir() {
     Some(v) => v,
-    None => error!("Unable to get path to Bookmarks.plist?"),
+    None => error!("Unable to get home directory?"),
   };
   plist_path.push("Library/Safari/Bookmarks.plist");
 
@@ -263,4 +264,119 @@ pub fn get_reading_list_urls() -> Vec<String> {
     )
     .map(|url| urls::tidy_url(url))
     .collect()
+}
+
+
+/// Get the com.apple.Safari.plist preferences file
+fn read_safari_plist() -> BTreeMap<String, Plist> {
+
+  // All Safari data lives at ~/Library/Safari/Bookmarks.plist
+  // TODO: There's probably a more idiomatic Rust-like way to write this.
+  let mut plist_path = match env::home_dir() {
+    Some(v) => v,
+    None => error!("Unable to get home directory?"),
+  };
+  plist_path.push("Library/SyncedPreferences/com.apple.Safari.plist");
+
+  let file = match File::open(plist_path) {
+    Ok(v) => v,
+    Err(e) => error!("Unable to open com.apple.Safari.plist: {:?}", e),
+  };
+
+  let plist = match Plist::read(file) {
+    Ok(v) => v,
+    Err(e) => error!("Unable to read com.apple.Safari.plist: {:?}", e),
+  };
+
+  let data = match plist.as_dictionary() {
+    Some(v) => v,
+    None => error!("Unable to parse com.apple.Safari.plist as dictionary?"),
+  };
+
+  // The structure of com.apple.Safari.plist is as follows:
+  //
+  //      <dict>
+  //        <key>values</key>
+  //        <dict>
+  //          <dict>
+  //            <key>[[ UUID ]]</key>
+  //            <dict>
+  //              ... dict data ...
+  //              <key>value</key>
+  //              <dict>
+  //                ... dict data ...
+  //                <key>DeviceName</key><string>[[ Device name ]]</string>
+  //                <key>Tabs</key>
+  //                <array>
+  //                  <dict>
+  //                    <key>Title</key><string>[[ Title ]]</string>
+  //                    <key>URL</key><string>[[ URL ]]</string>
+  //                  </dict>
+  //                  ... array items for other tabs ...
+  //                </array>
+  //              </dict>
+  //            </dict>
+  //            ... dicts for other devices ...
+  //          </dict>
+  //        </dict>
+  //      </dict>
+  //
+  match data.get("values") {
+    Some(child_key) => match child_key.as_dictionary() {
+      Some(v) => v.to_owned(),
+      None => error!("Top-level values key in com.apple.Safari.plist isn't an dictionary?"),
+    },
+    None => error!("Unable to find top-level values key in com.apple.Safari.plist"),
+  }
+}
+
+
+/// Return a list of devices in iCloud Tabs.
+pub fn list_icloud_tabs_devices() -> Vec<String> {
+  let plist = read_safari_plist();
+
+  plist
+    .values()
+    .map(|value| value
+      .as_dictionary().unwrap()
+      .get("value").unwrap()
+      .as_dictionary().unwrap()
+      .get("DeviceName").unwrap()
+      .as_string().unwrap()
+      .to_owned()
+    )
+    .collect()
+}
+
+
+/// Return a list of URLs from iCloud Tabs.
+pub fn get_icloud_tabs_urls() -> HashMap<String, Vec<String>> {
+  let plist = read_safari_plist();
+  let mut result: HashMap<String, Vec<String>> = HashMap::new();
+  let devices_with_tabs = plist
+    .values()
+    .map(|value| value
+      .as_dictionary().unwrap()
+      .get("value").unwrap()
+      .as_dictionary().unwrap()
+    );
+  for data in devices_with_tabs {
+    let name: String = data
+      .get("DeviceName").unwrap()
+      .as_string().unwrap()
+      .to_owned();
+    let urls: Vec<String> = data
+      .get("Tabs").unwrap()
+      .as_array().unwrap()
+      .iter()
+      .map(|tab| tab
+        .as_dictionary().unwrap()
+        .get("URL").unwrap()
+        .as_string().unwrap()
+      )
+      .map(|url| urls::tidy_url(url))
+      .collect();
+    result.insert(name, urls);
+  }
+  result
 }
