@@ -72,6 +72,23 @@ pub fn tidy_url(url: &str) -> String {
     };
   }
 
+  // Remove any UTM tracking parameters from URLs
+  parsed_url.query = match parsed_url.query {
+    Some(qs) => {
+      let mut query = parse_qs(&qs);
+      let utm_keys: Vec<_> = query
+        .keys()
+        .filter(|key| key.starts_with("utm_"))
+        .map(|k| k.clone())
+        .collect();
+      for key in utm_keys {
+        query.remove(&key);
+      }
+      encode_querystring(query)
+    },
+    None => None
+  };
+
   urlunparse(parsed_url)
 }
 
@@ -137,5 +154,20 @@ tidy_url_tests! {
   youtube_channel: (
     "https://www.youtube.com/user/TheQIElves",
     "https://www.youtube.com/user/TheQIElves"
+  ),
+
+  single_utm_tracker: (
+    "https://example.com?utm_medium=social",
+    "https://example.com",
+  ),
+
+  multiple_utm_tracker: (
+    "https://example.com?utm_medium=social&utm_source=twitter",
+    "https://example.com",
+  ),
+
+  multiple_utm_tracker_with_others: (
+    "https://example.com?utm_medium=social&foo=bar&utm_source=twitter&bar=baz",
+    "https://example.com?foo=bar&bar=baz",
   ),
 }

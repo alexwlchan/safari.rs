@@ -67,6 +67,7 @@ The commands that produce URLs do a bit of cleaning before they return:
     point to the desktop site (`twitter.com`).
 *   Tracking data is partially stripped from Amazon, Buzzfeed, Mashable and
     Medium URLs.
+*   Any UTM tracking parameters in the query string are removed.
 *   The `#notes` fragment is removed from Tumblr URLs.
 *   The `feature=youtu.be` query parameter is removed from YouTube URLs.
 
