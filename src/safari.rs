@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::fs::File;
+use std::path::PathBuf;
 use std::process;
 
 use applescript::{run as run_applescript};
@@ -151,29 +152,20 @@ pub fn close_tabs(url_patterns: Vec<&str>) {
 
 
 /// Get the Bookmarks.plist dict for a given title
-fn read_bookmarks_plist(path: &str, title: &str) -> Result<Plist, String> {
-
-  // All Safari data lives at ~/Library/Safari/Bookmarks.plist
-  // TODO: There's probably a more idiomatic Rust-like way to write this.
-  let mut plist_path = match env::home_dir() {
-    Some(v) => v,
-    None => error!("Unable to get home directory?"),
-  };
-  plist_path.push(path);
-
-  let file = match File::open(plist_path) {
+fn read_bookmarks_plist(path: &PathBuf, title: &str) -> Result<Plist, String> {
+  let file = match File::open(&path) {
     Ok(v) => v,
-    Err(e) => error!("Unable to open {}: {:?}", path, e),
+    Err(e) => error!("Unable to open {:?}: {:?}", path, e),
   };
 
   let plist = match Plist::read(file) {
     Ok(v) => v,
-    Err(e) => error!("Unable to read {}: {:?}", path, e),
+    Err(e) => error!("Unable to read {:?}: {:?}", path, e),
   };
 
   let data = match plist.as_dictionary() {
     Some(v) => v,
-    None => error!("Unable to parse {} as dictionary?", path),
+    None => error!("Unable to parse {:?} as dictionary?", path),
   };
 
   // The structure of Bookmarks.plist is as follows:
@@ -196,9 +188,9 @@ fn read_bookmarks_plist(path: &str, title: &str) -> Result<Plist, String> {
   let children = match data.get("Children") {
     Some(child_key) => match child_key.as_array() {
       Some(v) => v,
-      None => error!("Top-level children key in {} isn't an array?", path),
+      None => error!("Top-level children key in {:?} isn't an array?", path),
     },
-    None => error!("Unable to find top-level Children key in {}", path),
+    None => error!("Unable to find top-level Children key in {:?}", path),
   };
 
   let mut matching_children = children.iter().filter(|d|
@@ -217,11 +209,11 @@ fn read_bookmarks_plist(path: &str, title: &str) -> Result<Plist, String> {
   // Check we got one, and only one result.
   let result = match matching_children.next() {
     Some(v) => v,
-    None => error!("Unable to find key {} in {}", title, path),
+    None => error!("Unable to find key {} in {:?}", title, path),
   };
 
   match matching_children.next() {
-    Some(_) => error!("Got more than one result for {} in {}", title, path),
+    Some(_) => error!("Got more than one result for {} in {:?}", title, path),
     None => {},
   };
 
@@ -235,7 +227,14 @@ fn read_bookmarks_plist(path: &str, title: &str) -> Result<Plist, String> {
 /// Bookmarks.plist, which is usually (but not guaranteed to be) newest first.
 ///
 pub fn get_reading_list_urls() -> Result<Vec<String>, String> {
-  _get_reading_list_urls("Library/Safari/Bookmarks.plist")
+  // All Safari data lives at ~/Library/Safari/Bookmarks.plist
+  // TODO: There's probably a more idiomatic Rust-like way to write this.
+  let mut plist_path = match env::home_dir() {
+    Some(v) => v,
+    None => error!("Unable to get home directory?"),
+  };
+  plist_path.push("Library/Safari/Bookmarks.plist");
+  _get_reading_list_urls(&plist_path)
 }
 
 
@@ -246,8 +245,8 @@ pub fn get_reading_list_urls() -> Result<Vec<String>, String> {
 ///
 /// * `path` - Path to the Bookmarks.plist file.
 ///
-fn _get_reading_list_urls(path: &str) -> Result<Vec<String>, String> {
-  let plist = match read_bookmarks_plist(path, "com.apple.ReadingList") {
+fn _get_reading_list_urls(path: &PathBuf) -> Result<Vec<String>, String> {
+  let plist = match read_bookmarks_plist(&path, "com.apple.ReadingList") {
     Ok(v) => v,
     Err(e) => return Err(e),
   };
