@@ -151,7 +151,7 @@ pub fn close_tabs(url_patterns: Vec<&str>) {
 
 
 /// Get the Bookmarks.plist dict for a given title
-fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
+fn read_bookmarks_plist(path: &str, title: &str) -> Result<Plist, String> {
 
   // All Safari data lives at ~/Library/Safari/Bookmarks.plist
   // TODO: There's probably a more idiomatic Rust-like way to write this.
@@ -159,21 +159,21 @@ fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
     Some(v) => v,
     None => error!("Unable to get home directory?"),
   };
-  plist_path.push("Library/Safari/Bookmarks.plist");
+  plist_path.push(path);
 
   let file = match File::open(plist_path) {
     Ok(v) => v,
-    Err(e) => error!("Unable to open ~/Library/Safari/Bookmarks.plist: {:?}", e),
+    Err(e) => error!("Unable to open {}: {:?}", path, e),
   };
 
   let plist = match Plist::read(file) {
     Ok(v) => v,
-    Err(e) => error!("Unable to read ~/Library/Safari/Bookmarks.plist: {:?}", e),
+    Err(e) => error!("Unable to read {}: {:?}", path, e),
   };
 
   let data = match plist.as_dictionary() {
     Some(v) => v,
-    None => error!("Unable to parse ~/Library/Safari/Bookmarks.plist as dictionary?"),
+    None => error!("Unable to parse {} as dictionary?", path),
   };
 
   // The structure of Bookmarks.plist is as follows:
@@ -196,9 +196,9 @@ fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
   let children = match data.get("Children") {
     Some(child_key) => match child_key.as_array() {
       Some(v) => v,
-      None => error!("Top-level children key in ~/Library/Safari/Bookmarks.plist isn't an array?"),
+      None => error!("Top-level children key in {} isn't an array?", path),
     },
-    None => error!("Unable to find top-level Children key in ~/Library/Safari/Bookmarks.plist"),
+    None => error!("Unable to find top-level Children key in {}", path),
   };
 
   let mut matching_children = children.iter().filter(|d|
@@ -217,15 +217,25 @@ fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
   // Check we got one, and only one result.
   let result = match matching_children.next() {
     Some(v) => v,
-    None => error!("Unable to find key {} in Bookmarks.plist", title),
+    None => error!("Unable to find key {} in {}", title, path),
   };
 
   match matching_children.next() {
-    Some(_) => error!("Got more than one result for {} in Bookmarks.plist", title),
+    Some(_) => error!("Got more than one result for {} in {}", title, path),
     None => {},
   };
 
   Ok(result.to_owned())
+}
+
+
+/// Wrapper to return a list of URLs from Reading List.
+///
+/// Iteration order depends on the order in which they're stored in
+/// Bookmarks.plist, which is usually (but not guaranteed to be) newest first.
+///
+pub fn get_reading_list_urls() -> Result<Vec<String>, String> {
+  _get_reading_list_urls("Library/Safari/Bookmarks.plist")
 }
 
 
@@ -234,8 +244,10 @@ fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
 /// Iteration order depends on the order in which they're stored in
 /// Bookmarks.plist, which is usually (but not guaranteed to be) newest first.
 ///
-pub fn get_reading_list_urls() -> Result<Vec<String>, String> {
-  let plist = match read_bookmarks_plist("com.apple.ReadingList") {
+/// * `path` - Path to the Bookmarks.plist file.
+///
+fn _get_reading_list_urls(path: &str) -> Result<Vec<String>, String> {
+  let plist = match read_bookmarks_plist(path, "com.apple.ReadingList") {
     Ok(v) => v,
     Err(e) => return Err(e),
   };
