@@ -46,9 +46,14 @@ fn main() {
 
   if args.cmd_urls_all {
     safari::assert_safari_is_running();
-    for url in safari::get_all_urls() {
-      println!("{}", url);
-    }
+    match safari::get_all_urls() {
+      Ok(urls) => {
+        for url in urls {
+          println!("{}", url);
+        }
+      },
+      Err(e) => error!("{}", e),
+    };
   }
 
   if args.cmd_close_tabs {

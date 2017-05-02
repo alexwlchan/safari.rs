@@ -95,18 +95,20 @@ pub fn get_url(window: Option<i32>, tab: Option<i32>) -> Result<String, String> 
 /// order depends on AppleScript, which I don't think is guaranteed to be
 /// stable (in particular, I think it depends on which window is frontmost).
 ///
-pub fn get_all_urls() -> Vec<String> {
+pub fn get_all_urls() -> Result<Vec<String>, String> {
   let script = include_str!("scripts/list-open-tabs.scpt");
   let output = run_applescript(&script);
   if output.status.success() {
-    output.stdout.trim()
-                 .split(", ")
-                 .map(|url| urls::tidy_url(url))
-                 .filter(|url| url != "favorites://")
-                 .filter(|url| url != "://missing value")
-                 .collect()
+    Ok(output.stdout
+      .trim()
+      .split(", ")
+      .map(|url| urls::tidy_url(url))
+      .filter(|url| url != "favorites://")
+      .filter(|url| url != "://missing value")
+      .collect()
+    )
   } else {
-    old_error!("Unexpected error from osascript: {:?}", output.stderr);
+    error!("Unexpected error from osascript: {:?}", output.stderr);
   }
 }
 
