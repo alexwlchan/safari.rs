@@ -1,7 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::fs::File;
-use std::io::Write;
 use std::process;
 
 use applescript::{run as run_applescript};
@@ -13,13 +12,8 @@ use tera::{Context, Tera};
 use urls;
 
 
-// http://stackoverflow.com/a/27590832/1558022
 macro_rules! error(
-    ($($arg:tt)*) => { {
-        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
-        r.expect("failed printing to stderr");
-        process::exit(1);
-    } }
+  ($($arg:tt)*) => { { return Err(format!($($arg)*)) } }
 );
 
 
@@ -38,14 +32,6 @@ pub fn is_safari_running() -> bool {
 }
 
 
-/// Exits the program if Safari isn't running.
-pub fn assert_safari_is_running() {
-  if !is_safari_running() {
-    error!("Safari is not running.");
-  }
-}
-
-
 /// Return a URL from a Safari window.
 ///
 /// Given a (window, tab) pair, this function looks up the URL of the tab.
@@ -56,7 +42,7 @@ pub fn assert_safari_is_running() {
 ///              frontmost window.
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
-pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
+pub fn get_url(window: Option<i32>, tab: Option<i32>) -> Result<String, String> {
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {
@@ -70,12 +56,12 @@ pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
   let output = run_applescript(&command);
 
   if output.status.success() {
-    urls::tidy_url(output.stdout.trim())
+    Ok(urls::tidy_url(output.stdout.trim()))
   } else {
     if output.stderr.contains("Invalid index") {
-      error!("Invalid index: no such window or tab.");
+      error!("Invalid index: no such window or tab.")
     } else {
-      error!("Unexpected error from osascript: {:?}", output.stderr);
+      error!("Unexpected error from osascript: {:?}", output.stderr)
     }
   }
 }
@@ -87,16 +73,18 @@ pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
 /// order depends on AppleScript, which I don't think is guaranteed to be
 /// stable (in particular, I think it depends on which window is frontmost).
 ///
-pub fn get_all_urls() -> Vec<String> {
+pub fn get_all_urls() -> Result<Vec<String>, String> {
   let script = include_str!("scripts/list-open-tabs.scpt");
   let output = run_applescript(&script);
   if output.status.success() {
-    output.stdout.trim()
-                 .split(", ")
-                 .map(|url| urls::tidy_url(url))
-                 .filter(|url| url != "favorites://")
-                 .filter(|url| url != "://missing value")
-                 .collect()
+    Ok(output.stdout
+      .trim()
+      .split(", ")
+      .map(|url| urls::tidy_url(url))
+      .filter(|url| url != "favorites://")
+      .filter(|url| url != "://missing value")
+      .collect()
+    )
   } else {
     error!("Unexpected error from osascript: {:?}", output.stderr);
   }
@@ -163,7 +151,7 @@ pub fn close_tabs(url_patterns: Vec<&str>) {
 
 
 /// Get the Bookmarks.plist dict for a given title
-fn read_bookmarks_plist(title: &str) -> Plist {
+fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
 
   // All Safari data lives at ~/Library/Safari/Bookmarks.plist
   // TODO: There's probably a more idiomatic Rust-like way to write this.
@@ -237,7 +225,7 @@ fn read_bookmarks_plist(title: &str) -> Plist {
     None => {},
   };
 
-  result.to_owned()
+  Ok(result.to_owned())
 }
 
 
@@ -246,8 +234,11 @@ fn read_bookmarks_plist(title: &str) -> Plist {
 /// Iteration order depends on the order in which they're stored in
 /// Bookmarks.plist, which is usually (but not guaranteed to be) newest first.
 ///
-pub fn get_reading_list_urls() -> Vec<String> {
-  let plist = read_bookmarks_plist("com.apple.ReadingList");
+pub fn get_reading_list_urls() -> Result<Vec<String>, String> {
+  let plist = match read_bookmarks_plist("com.apple.ReadingList") {
+    Ok(v) => v,
+    Err(e) => return Err(e),
+  };
 
   // TODO: All these unwrap() calls should probably be handled better
   let children = plist
@@ -255,7 +246,7 @@ pub fn get_reading_list_urls() -> Vec<String> {
     .get("Children").unwrap()
     .as_array().unwrap();
 
-  children
+  Ok(children
     .iter()
     .map(|child|
       child
@@ -265,11 +256,12 @@ pub fn get_reading_list_urls() -> Vec<String> {
     )
     .map(|url| urls::tidy_url(url))
     .collect()
+  )
 }
 
 
 /// Get the com.apple.Safari.plist preferences file
-fn read_safari_plist() -> BTreeMap<String, Plist> {
+fn read_safari_plist() -> Result<BTreeMap<String, Plist>, String> {
 
   // All Safari data lives at ~/Library/Safari/Bookmarks.plist
   // TODO: There's probably a more idiomatic Rust-like way to write this.
@@ -324,7 +316,7 @@ fn read_safari_plist() -> BTreeMap<String, Plist> {
   //
   match data.get("values") {
     Some(child_key) => match child_key.as_dictionary() {
-      Some(v) => v.to_owned(),
+      Some(v) => Ok(v.to_owned()),
       None => error!("Top-level values key in com.apple.Safari.plist isn't an dictionary?"),
     },
     None => error!("Unable to find top-level values key in com.apple.Safari.plist"),
@@ -333,10 +325,13 @@ fn read_safari_plist() -> BTreeMap<String, Plist> {
 
 
 /// Return a list of devices in iCloud Tabs.
-pub fn list_icloud_tabs_devices() -> Vec<String> {
-  let plist = read_safari_plist();
+pub fn list_icloud_tabs_devices() -> Result<Vec<String>, String> {
+  let plist = match read_safari_plist() {
+    Ok(plist) => plist,
+    Err(e) => return Err(e),
+  };
 
-  plist
+  Ok(plist
     .values()
     .map(|value| value
       .as_dictionary().unwrap()
@@ -347,12 +342,16 @@ pub fn list_icloud_tabs_devices() -> Vec<String> {
       .to_owned()
     )
     .collect()
+  )
 }
 
 
 /// Return a list of URLs from iCloud Tabs.
-pub fn get_icloud_tabs_urls() -> HashMap<String, Vec<String>> {
-  let plist = read_safari_plist();
+pub fn get_icloud_tabs_urls() -> Result<HashMap<String, Vec<String>>, String> {
+  let plist = match read_safari_plist() {
+    Ok(plist) => plist,
+    Err(e) => return Err(e),
+  };
   let mut result: HashMap<String, Vec<String>> = HashMap::new();
   let devices_with_tabs = plist
     .values()
@@ -379,5 +378,5 @@ pub fn get_icloud_tabs_urls() -> HashMap<String, Vec<String>> {
       .collect();
     result.insert(name, urls);
   }
-  result
+  Ok(result)
 }
