@@ -38,7 +38,10 @@ fn main() {
 
   if args.cmd_url {
     safari::assert_safari_is_running();
-    print!("{}", safari::get_url(args.flag_window, args.flag_tab));
+    match safari::get_url(args.flag_window, args.flag_tab) {
+      Ok(url) => print!("{}", url),
+      Err(e) => error!("{}", e),
+    };
   }
 
   if args.cmd_urls_all {

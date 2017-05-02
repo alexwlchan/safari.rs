@@ -64,7 +64,7 @@ pub fn assert_safari_is_running() {
 ///              frontmost window.
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
-pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
+pub fn get_url(window: Option<i32>, tab: Option<i32>) -> Result<String, String> {
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {
@@ -78,12 +78,12 @@ pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
   let output = run_applescript(&command);
 
   if output.status.success() {
-    urls::tidy_url(output.stdout.trim())
+    Ok(urls::tidy_url(output.stdout.trim()))
   } else {
     if output.stderr.contains("Invalid index") {
-      old_error!("Invalid index: no such window or tab.");
+      error!("Invalid index: no such window or tab.")
     } else {
-      old_error!("Unexpected error from osascript: {:?}", output.stderr);
+      error!("Unexpected error from osascript: {:?}", output.stderr)
     }
   }
 }
