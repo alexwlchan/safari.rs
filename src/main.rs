@@ -7,6 +7,9 @@ extern crate tera;
 extern crate urlencoding;
 extern crate urlparse;
 
+use std::io::Write;
+use std::process;
+
 mod applescript;
 mod cli;
 mod safari;
@@ -14,6 +17,16 @@ mod urls;
 
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+
+// http://stackoverflow.com/a/27590832/1558022
+macro_rules! error(
+    ($($arg:tt)*) => { {
+        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
+        r.expect("failed printing to stderr");
+        process::exit(1);
+    } }
+);
 
 
 fn main() {
@@ -42,9 +55,14 @@ fn main() {
   }
 
   if args.cmd_reading_list {
-    for url in safari::get_reading_list_urls() {
-      println!("{}", url);
-    }
+    match safari::get_reading_list_urls() {
+      Ok(urls) => {
+        for url in urls {
+          println!("{}", url);
+        }
+      },
+      Err(e) => error!("{}", e),
+    };
   }
 
   if args.cmd_icloud_tabs {

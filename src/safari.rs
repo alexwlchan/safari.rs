@@ -14,12 +14,20 @@ use urls;
 
 
 // http://stackoverflow.com/a/27590832/1558022
-macro_rules! error(
+macro_rules! old_error(
     ($($arg:tt)*) => { {
         let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
         r.expect("failed printing to stderr");
         process::exit(1);
     } }
+);
+
+macro_rules! error(
+  ($($arg:tt)*) => {
+    {
+      return Err(format!($($arg)*))
+    }
+  }
 );
 
 
@@ -41,7 +49,7 @@ pub fn is_safari_running() -> bool {
 /// Exits the program if Safari isn't running.
 pub fn assert_safari_is_running() {
   if !is_safari_running() {
-    error!("Safari is not running.");
+    old_error!("Safari is not running.");
   }
 }
 
@@ -73,9 +81,9 @@ pub fn get_url(window: Option<i32>, tab: Option<i32>) -> String {
     urls::tidy_url(output.stdout.trim())
   } else {
     if output.stderr.contains("Invalid index") {
-      error!("Invalid index: no such window or tab.");
+      old_error!("Invalid index: no such window or tab.");
     } else {
-      error!("Unexpected error from osascript: {:?}", output.stderr);
+      old_error!("Unexpected error from osascript: {:?}", output.stderr);
     }
   }
 }
@@ -98,7 +106,7 @@ pub fn get_all_urls() -> Vec<String> {
                  .filter(|url| url != "://missing value")
                  .collect()
   } else {
-    error!("Unexpected error from osascript: {:?}", output.stderr);
+    old_error!("Unexpected error from osascript: {:?}", output.stderr);
   }
 }
 
@@ -163,7 +171,7 @@ pub fn close_tabs(url_patterns: Vec<&str>) {
 
 
 /// Get the Bookmarks.plist dict for a given title
-fn read_bookmarks_plist(title: &str) -> Plist {
+fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
 
   // All Safari data lives at ~/Library/Safari/Bookmarks.plist
   // TODO: There's probably a more idiomatic Rust-like way to write this.
@@ -237,7 +245,7 @@ fn read_bookmarks_plist(title: &str) -> Plist {
     None => {},
   };
 
-  result.to_owned()
+  Ok(result.to_owned())
 }
 
 
@@ -246,8 +254,11 @@ fn read_bookmarks_plist(title: &str) -> Plist {
 /// Iteration order depends on the order in which they're stored in
 /// Bookmarks.plist, which is usually (but not guaranteed to be) newest first.
 ///
-pub fn get_reading_list_urls() -> Vec<String> {
-  let plist = read_bookmarks_plist("com.apple.ReadingList");
+pub fn get_reading_list_urls() -> Result<Vec<String>, String> {
+  let plist = match read_bookmarks_plist("com.apple.ReadingList") {
+    Ok(v) => v,
+    Err(e) => return Err(e),
+  };
 
   // TODO: All these unwrap() calls should probably be handled better
   let children = plist
@@ -255,7 +266,7 @@ pub fn get_reading_list_urls() -> Vec<String> {
     .get("Children").unwrap()
     .as_array().unwrap();
 
-  children
+  Ok(children
     .iter()
     .map(|child|
       child
@@ -265,6 +276,7 @@ pub fn get_reading_list_urls() -> Vec<String> {
     )
     .map(|url| urls::tidy_url(url))
     .collect()
+  )
 }
 
 
@@ -275,23 +287,23 @@ fn read_safari_plist() -> BTreeMap<String, Plist> {
   // TODO: There's probably a more idiomatic Rust-like way to write this.
   let mut plist_path = match env::home_dir() {
     Some(v) => v,
-    None => error!("Unable to get home directory?"),
+    None => old_error!("Unable to get home directory?"),
   };
   plist_path.push("Library/SyncedPreferences/com.apple.Safari.plist");
 
   let file = match File::open(plist_path) {
     Ok(v) => v,
-    Err(e) => error!("Unable to open com.apple.Safari.plist: {:?}", e),
+    Err(e) => old_error!("Unable to open com.apple.Safari.plist: {:?}", e),
   };
 
   let plist = match Plist::read(file) {
     Ok(v) => v,
-    Err(e) => error!("Unable to read com.apple.Safari.plist: {:?}", e),
+    Err(e) => old_error!("Unable to read com.apple.Safari.plist: {:?}", e),
   };
 
   let data = match plist.as_dictionary() {
     Some(v) => v,
-    None => error!("Unable to parse com.apple.Safari.plist as dictionary?"),
+    None => old_error!("Unable to parse com.apple.Safari.plist as dictionary?"),
   };
 
   // The structure of com.apple.Safari.plist is as follows:
@@ -325,9 +337,9 @@ fn read_safari_plist() -> BTreeMap<String, Plist> {
   match data.get("values") {
     Some(child_key) => match child_key.as_dictionary() {
       Some(v) => v.to_owned(),
-      None => error!("Top-level values key in com.apple.Safari.plist isn't an dictionary?"),
+      None => old_error!("Top-level values key in com.apple.Safari.plist isn't an dictionary?"),
     },
-    None => error!("Unable to find top-level values key in com.apple.Safari.plist"),
+    None => old_error!("Unable to find top-level values key in com.apple.Safari.plist"),
   }
 }
 
