@@ -1,7 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 use std::env;
 use std::fs::File;
-use std::io::Write;
 use std::process;
 
 use applescript::{run as run_applescript};
@@ -13,21 +12,8 @@ use tera::{Context, Tera};
 use urls;
 
 
-// http://stackoverflow.com/a/27590832/1558022
-macro_rules! old_error(
-    ($($arg:tt)*) => { {
-        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
-        r.expect("failed printing to stderr");
-        process::exit(1);
-    } }
-);
-
 macro_rules! error(
-  ($($arg:tt)*) => {
-    {
-      return Err(format!($($arg)*))
-    }
-  }
+  ($($arg:tt)*) => { { return Err(format!($($arg)*)) } }
 );
 
 
@@ -43,14 +29,6 @@ pub fn is_safari_running() -> bool {
     }
   }
   false
-}
-
-
-/// Exits the program if Safari isn't running.
-pub fn assert_safari_is_running() {
-  if !is_safari_running() {
-    old_error!("Safari is not running.");
-  }
 }
 
 

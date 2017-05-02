@@ -29,6 +29,14 @@ macro_rules! error(
 );
 
 
+/// Exits the program if Safari isn't running.
+fn assert_safari_is_running() {
+  if !safari::is_safari_running() {
+    error!("Safari is not running.");
+  }
+}
+
+
 fn main() {
   let args = cli::parse_args(NAME);
 
@@ -37,7 +45,7 @@ fn main() {
   }
 
   if args.cmd_url {
-    safari::assert_safari_is_running();
+    assert_safari_is_running();
     match safari::get_url(args.flag_window, args.flag_tab) {
       Ok(url) => print!("{}", url),
       Err(e) => error!("{}", e),
@@ -45,7 +53,7 @@ fn main() {
   }
 
   if args.cmd_urls_all {
-    safari::assert_safari_is_running();
+    assert_safari_is_running();
     match safari::get_all_urls() {
       Ok(urls) => {
         for url in urls {
@@ -57,7 +65,7 @@ fn main() {
   }
 
   if args.cmd_close_tabs {
-    safari::assert_safari_is_running();
+    assert_safari_is_running();
     let patterns = args.arg_urls_to_close.split(",").collect();
     safari::close_tabs(patterns);
   }
