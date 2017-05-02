@@ -21,11 +21,11 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // http://stackoverflow.com/a/27590832/1558022
 macro_rules! error(
-    ($($arg:tt)*) => { {
-        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
-        r.expect("failed printing to stderr");
-        process::exit(1);
-    } }
+  ($($arg:tt)*) => { {
+    let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
+    r.expect("failed printing to stderr");
+    process::exit(1);
+  } }
 );
 
 
@@ -84,12 +84,13 @@ fn main() {
   if args.cmd_icloud_tabs {
     if args.flag_list_devices {
       let devices = match safari::list_icloud_tabs_devices() {
-        Ok(devices) => devices,
+        Ok(devices) => {
+          for device in devices {
+            println!("{}", device);
+          }
+        },
         Err(e) => error!("{}", e),
       };
-      for device in devices {
-        println!("{}", device);
-      }
     } else {
       let tab_data = match safari::get_icloud_tabs_urls() {
         Ok(tab_data) => tab_data,
