@@ -67,11 +67,18 @@ fn main() {
 
   if args.cmd_icloud_tabs {
     if args.flag_list_devices {
-      for device in safari::list_icloud_tabs_devices() {
+      let devices = match safari::list_icloud_tabs_devices() {
+        Ok(devices) => devices,
+        Err(e) => error!("{}", e),
+      };
+      for device in devices {
         println!("{}", device);
       }
     } else {
-      let tab_data = safari::get_icloud_tabs_urls();
+      let tab_data = match safari::get_icloud_tabs_urls() {
+        Ok(tab_data) => tab_data,
+        Err(e) => error!("{}", e),
+      };
       match args.flag_device {
         Some(d) => {
           match tab_data.get(&d) {
