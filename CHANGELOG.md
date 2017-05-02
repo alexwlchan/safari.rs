@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.2 (2017-05-02)
+
+*   Bugfix: don't panic on the `icloud-tabs` command if there's a device that doesn't have any tabs open ([#23](https://github.com/alexwlchan/safari.rs/issues/23)).
+
 ## v2.0.1 (2017-04-30)
 
 *   Bugfix: don't include `://missing value` in the list of currently open Safari tabs.
