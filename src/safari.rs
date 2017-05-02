@@ -352,6 +352,23 @@ pub fn get_icloud_tabs_urls() -> Result<HashMap<String, Vec<String>>, String> {
     Ok(plist) => plist,
     Err(e) => return Err(e),
   };
+
+  // Within the `values` dictionary, each device is as follows:
+  //
+  //    <key>[[ device UUID ]]</key>
+  //    <dict>
+  //      [[ device data ]]
+  //      <dict>
+  //        <key>Tabs</key>
+  //        <key>DeviceName</key><string>[[ device name ]]</key>
+  //        <key>Tabs</key>
+  //        <array>
+  //          <dict>
+  //            <key>URL</key><string>[[ URL ]]</string>
+  //            [[ other tab data ]]
+  //          </dict>
+  //          [[ other tabs ]]
+  //
   let mut result: HashMap<String, Vec<String>> = HashMap::new();
   let devices_with_tabs = plist
     .values()
@@ -365,6 +382,13 @@ pub fn get_icloud_tabs_urls() -> Result<HashMap<String, Vec<String>>, String> {
       .get("DeviceName").unwrap()
       .as_string().unwrap()
       .to_owned();
+
+    // If a device is registered with iCloud but Safari isn't running or
+    // there aren't any tabs open, there isn't a Tabs field.
+    if !data.contains_key("Tabs") {
+      continue;
+    }
+
     let urls: Vec<String> = data
       .get("Tabs").unwrap()
       .as_array().unwrap()
