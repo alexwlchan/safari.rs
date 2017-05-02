@@ -83,7 +83,7 @@ fn main() {
 
   if args.cmd_icloud_tabs {
     if args.flag_list_devices {
-      let devices = match safari::list_icloud_tabs_devices() {
+      match safari::list_icloud_tabs_devices() {
         Ok(devices) => {
           for device in devices {
             println!("{}", device);
