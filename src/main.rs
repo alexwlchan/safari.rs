@@ -20,7 +20,7 @@ fn main() {
   let args = cli::parse_args(NAME);
 
   if args.flag_version {
-    println!("{} v{}", NAME, VERSION);
+    println!("{}.rs v{}", NAME, VERSION);
   }
 
   if args.cmd_url {
