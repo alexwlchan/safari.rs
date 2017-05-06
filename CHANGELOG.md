@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.3 (2017-05-06)
+
+*   URL tweak: discard `?highlight` and fragment from `docs.python.org` URLs
+    if they're pointing at a module on a module page.
+
 ## v2.0.2 (2017-05-02)
 
 *   Bugfix: don't panic on the `icloud-tabs` command if there's a device that doesn't have any tabs open ([#23](https://github.com/alexwlchan/safari.rs/issues/23)).
