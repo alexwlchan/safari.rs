@@ -107,6 +107,26 @@ pub fn tidy_url(url: &str) -> String {
     None => None
   };
 
+  // Tidy up the query and anchor links in modules on docs.python.org
+  if parsed_url.netloc == "docs.python.org" {
+
+    // If this is a module page, scrap any module- fragment.
+    parsed_url.fragment = match parsed_url.fragment {
+      Some(fragment) => if fragment.starts_with("module-") { None } else { Some(fragment) },
+      None => None,
+    };
+
+    // Scrap the highlight
+    parsed_url.query = match parsed_url.query {
+      Some(qs) => {
+        let mut query = parse_qs(&qs);
+        query.remove("highlight");
+        encode_querystring(query)
+      },
+      None => None,
+    };
+  }
+
   urlunparse(parsed_url)
 }
 
@@ -197,5 +217,30 @@ tidy_url_tests! {
   url_with_numerals: (
     "https://example.com?foo=bar0baz",
     "https://example.com?foo=bar0baz"
+  ),
+
+  python_docs_bare: (
+    "https://docs.python.org/3.5/library/subprocess.html",
+    "https://docs.python.org/3.5/library/subprocess.html"
+  ),
+
+  python_docs_with_anchor: (
+    "https://docs.python.org/3.5/library/subprocess.html#subprocess.run",
+    "https://docs.python.org/3.5/library/subprocess.html#subprocess.run"
+  ),
+
+  python_docs_with_highlight: (
+    "https://docs.python.org/3.5/library/subprocess.html?highlight=subprocess",
+    "https://docs.python.org/3.5/library/subprocess.html"
+  ),
+
+  python_docs_with_highlight_anchor: (
+    "https://docs.python.org/3.5/library/subprocess.html?highlight=subprocess#subprocess.run",
+    "https://docs.python.org/3.5/library/subprocess.html#subprocess.run"
+  ),
+
+  python_docs_with_highlight_module_anchor: (
+    "https://docs.python.org/3.5/library/subprocess.html?highlight=subprocess#module-subprocess",
+    "https://docs.python.org/3.5/library/subprocess.html"
   ),
 }
