@@ -198,4 +198,29 @@ tidy_url_tests! {
     "https://example.com?foo=bar0baz",
     "https://example.com?foo=bar0baz"
   ),
+
+  python_docs_bare: (
+    "https://docs.python.org/3.5/library/subprocess.html",
+    "https://docs.python.org/3.5/library/subprocess.html"
+  ),
+
+  python_docs_with_anchor: (
+    "https://docs.python.org/3.5/library/subprocess.html#subprocess.run",
+    "https://docs.python.org/3.5/library/subprocess.html#subprocess.run"
+  ),
+
+  python_docs_with_highlight: (
+    "https://docs.python.org/3.5/library/subprocess.html?highlight=subprocess",
+    "https://docs.python.org/3.5/library/subprocess.html"
+  ),
+
+  python_docs_with_highlight_anchor: (
+    "https://docs.python.org/3.5/library/subprocess.html?highlight=subprocess#subprocess.run",
+    "https://docs.python.org/3.5/library/subprocess.html#subprocess.run"
+  ),
+
+  python_docs_with_highlight_module_anchor: (
+    "https://docs.python.org/3.5/library/subprocess.html?highlight=subprocess#module-subprocess",
+    "https://docs.python.org/3.5/library/subprocess.html"
+  ),
 }
