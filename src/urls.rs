@@ -107,6 +107,26 @@ pub fn tidy_url(url: &str) -> String {
     None => None
   };
 
+  // Tidy up the query and anchor links in modules on docs.python.org
+  if parsed_url.netloc == "docs.python.org" {
+
+    // If this is a module page, scrap any module- fragment.
+    parsed_url.fragment = match parsed_url.fragment {
+      Some(fragment) => if fragment.starts_with("module-") { None } else { Some(fragment) },
+      None => None,
+    };
+
+    // Scrap the highlight
+    parsed_url.query = match parsed_url.query {
+      Some(qs) => {
+        let mut query = parse_qs(&qs);
+        query.remove("highlight");
+        encode_querystring(query)
+      },
+      None => None,
+    };
+  }
+
   urlunparse(parsed_url)
 }
 
