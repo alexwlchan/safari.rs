@@ -252,4 +252,19 @@ tidy_url_tests! {
     "https://docs.python.org/3.5/library/subprocess.html?highlight=subprocess#module-subprocess",
     "https://docs.python.org/3.5/library/subprocess.html"
   ),
+
+  stack_overflow_non_question: (
+    "http://stackoverflow.com/questions/tagged/html+regex",
+    "http://stackoverflow.com/questions/tagged/html+regex"
+  ),
+
+  stack_overflow_question: (
+    "http://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags",
+    "http://stackoverflow.com/q/1732348/1558022"
+  ),
+
+  stack_overflow_answer: (
+    "http://stackoverflow.com/questions/82831/how-do-i-check-whether-a-file-exists-using-python#82852",
+    "http://stackoverflow.com/a/82852/1558022"
+  ),
 }
