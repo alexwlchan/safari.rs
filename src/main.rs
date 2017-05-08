@@ -21,11 +21,13 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 // http://stackoverflow.com/a/27590832/1558022
 macro_rules! error(
-  ($($arg:tt)*) => { {
-    let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
-    r.expect("failed printing to stderr");
-    process::exit(1);
-  } }
+  ($($arg:tt)*) => {
+    {
+      let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
+      r.expect("failed printing to stderr");
+      process::exit(1);
+    }
+  }
 );
 
 
