@@ -1,5 +1,5 @@
 use urlencoding::{encode as urlencode};
-use urlparse::{Query, parse_qs, urlparse, urlunparse};
+use urlparse::{Query, parse_qs, urlparse, urlunparse, Url};
 
 
 fn partial_urlencode(value: &str) -> String {
@@ -122,36 +122,60 @@ pub fn tidy_url(url: &str) -> String {
 
   // Convert links to questions on Stack Overflow to insert my sharing
   // link for the Announcer badge.
-  if parsed_url.netloc == "stackoverflow.com" {
-    if parsed_url.path.starts_with("/questions/") {
-      let original_path = parsed_url.path.to_owned();
-      let new_path = match original_path.split("/").nth(2) {
-        Some(path_component) => {
-          // Check it's a number
-          match path_component.parse::<i32>() {
-            Ok(q_id) => {
-              // Check if there's an answer fragment
-              match parsed_url.fragment.to_owned() {
-                Some(ans_id) => Some(format!("/a/{}/1558022", ans_id)),
-                None => Some(format!("/q/{}/1558022", q_id)),
-              }
-            },
-            Err(_) => None,
-          }
-        }
-        None => None,
-      };
-      match new_path {
-        Some(p) => {
-          parsed_url.path = p;
-          parsed_url.fragment = None;
-        },
-        None => (),
-      };
-    }
-  }
+  fix_se_referral(&mut parsed_url, "stackoverflow.com", "1558022");
 
   urlunparse(parsed_url)
+}
+
+
+/// Turn a URL into a Stack Exchange referral link.
+///
+/// - `parsed_url` - the `Url` structure returned by urlparse
+/// - `hostname` - hostname of the SE site in question
+/// - `user_id` - your user ID on the SE site
+///
+fn fix_se_referral(parsed_url: &mut Url, hostname: &str, user_id: &str) {
+
+  if parsed_url.netloc != hostname {
+    return;
+  }
+
+  // A question URL is of the form
+  //
+  //    http://stackoverflow.com/questions/:question_id/:question_title
+  //
+  if !parsed_url.path.starts_with("/questions") {
+    return;
+  }
+
+  // Take a copy of the original path to get around ownership rules
+  let original_path = parsed_url.path.to_owned();
+
+  let new_path = match original_path.split("/").nth(2) {
+    Some(path_component) => {
+      // Check it's a number
+      match path_component.parse::<i32>() {
+        Ok(q_id) => {
+          // Check if there's an answer fragment
+          match parsed_url.fragment.to_owned() {
+            Some(ans_id) => Some(format!("/a/{}/{}", ans_id, user_id)),
+            None => Some(format!("/q/{}/{}", q_id, user_id)),
+          }
+        },
+        Err(_) => None,
+      }
+    }
+    None => None,
+  };
+
+  // If we got something interesting, update the URL.
+  match new_path {
+    Some(p) => {
+      parsed_url.path = p;
+      parsed_url.fragment = None;
+    },
+    None => (),
+  };
 }
 
 
