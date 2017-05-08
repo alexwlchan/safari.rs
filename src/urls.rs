@@ -120,6 +120,37 @@ pub fn tidy_url(url: &str) -> String {
     };
   }
 
+  // Convert links to questions on Stack Overflow to insert my sharing
+  // link for the Announcer badge.
+  if parsed_url.netloc == "stackoverflow.com" {
+    if parsed_url.path.starts_with("/questions/") {
+      let original_path = parsed_url.path.to_owned();
+      let new_path = match original_path.split("/").nth(2) {
+        Some(path_component) => {
+          // Check it's a number
+          match path_component.parse::<i32>() {
+            Ok(q_id) => {
+              // Check if there's an answer fragment
+              match parsed_url.fragment.to_owned() {
+                Some(ans_id) => Some(format!("/a/{}/1558022", ans_id)),
+                None => Some(format!("/q/{}/1558022", q_id)),
+              }
+            },
+            Err(_) => None,
+          }
+        }
+        None => None,
+      };
+      match new_path {
+        Some(p) => {
+          parsed_url.path = p;
+          parsed_url.fragment = None;
+        },
+        None => (),
+      };
+    }
+  }
+
   urlunparse(parsed_url)
 }
 
