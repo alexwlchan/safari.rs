@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.4 (2017-05-08)
+
+*   URL tweak: Stack Overflow URLs now use the Share links provided for SO referrals.
+
 ## v2.0.3 (2017-05-06)
 
 *   URL tweak: discard `?highlight` and fragment from `docs.python.org` URLs
