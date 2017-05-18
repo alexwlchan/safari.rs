@@ -77,17 +77,78 @@ pub fn get_all_urls() -> Result<Vec<String>, String> {
   let script = include_str!("scripts/list-open-tabs.scpt");
   let output = run_applescript(&script);
   if output.status.success() {
-    Ok(output.stdout
-      .trim()
-      .split(", ")
-      .map(|url| urls::tidy_url(url))
-      .filter(|url| url != "favorites://")
-      .filter(|url| url != "://missing value")
-      .collect()
-    )
+    Ok(parse_list_open_tabs_output(&output.stdout))
   } else {
     error!("Unexpected error from osascript: {:?}", output.stderr);
   }
+}
+
+
+/// Given AppleScript output from list-open-tabs.scpt, return a list of URLs.
+fn parse_list_open_tabs_output(stdout: &str) -> Vec<String> {
+  stdout
+    .trim()
+    .split(", ")
+    .map(|url| urls::tidy_url(url))
+    .filter(|url| url != "favorites://")
+    .filter(|url| url != "://missing value")
+    .filter(|url| url != "://")
+    .collect()
+}
+
+
+macro_rules! parse_list_open_tabs_output_tests {
+  ($($name:ident: $value:expr,)*) => {
+    $(
+      #[test]
+      fn $name() {
+        let (input, expected) = $value;
+        assert_eq!(expected, parse_list_open_tabs_output(input));
+      }
+    )*
+  }
+}
+
+
+parse_list_open_tabs_output_tests! {
+
+  // I don't have a good way to put an empty vector on the right-hand side of
+  // this comparison, so no test checks for nothing (yet).
+
+  favorites_with_url: (
+    "favorites://, http://example.org",
+    vec!["http://example.org"]
+  ),
+
+  url_with_missing_value: (
+    "://missing value, https://www.example.net",
+    vec!["https://www.example.net"]
+  ),
+
+  single_url: (
+    "http://foo_bar.com",
+    vec!["http://foo_bar.com"]
+  ),
+
+  multiple_urls: (
+    "http://example.org, https://www.example.net, http://test.co.uk",
+    vec!["http://example.org", "https://www.example.net", "http://test.co.uk"]
+  ),
+
+  with_extra_whitespace: (
+    "    http://space.org, https://www.nasa.gov   ",
+    vec!["http://space.org", "https://www.nasa.gov"]
+  ),
+
+  applies_tidy_url_transform: (
+    "https://mobile.twitter.com",
+    vec!["https://twitter.com"]
+  ),
+
+  colon_slash_slash_with_url: (
+    "://, http://example.org",
+    vec!["http://example.org"]
+  ),
 }
 
 
