@@ -143,6 +143,11 @@ parse_list_open_tabs_output_tests! {
     "https://mobile.twitter.com",
     vec!["https://twitter.com"]
   ),
+
+  colon_slash_slash_with_url: (
+    "://, http://example.org",
+    vec!["http://example.org"]
+  ),
 }
 
 
