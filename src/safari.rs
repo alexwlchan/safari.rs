@@ -92,6 +92,7 @@ fn parse_list_open_tabs_output(stdout: &str) -> Vec<String> {
     .map(|url| urls::tidy_url(url))
     .filter(|url| url != "favorites://")
     .filter(|url| url != "://missing value")
+    .filter(|url| url != "://")
     .collect()
 }
 
