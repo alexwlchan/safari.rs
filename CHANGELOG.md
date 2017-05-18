@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.5
+
+*   Bugfix: don't include `://` in the list of currently open Safari tabs.
+    ([#35](https://github.com/alexwlchan/safari.rs/issues/35))
+
 ## v2.0.4 (2017-05-08)
 
 *   URL tweak: Stack Overflow URLs now use the Share links provided for SO referrals.
