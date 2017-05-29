@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.6 (2017-05-29)
+
+*   URL tweak: scifi.stackexchange.com URLs now uses the Share links provided for SFF.SE referrals.
+
 ## v2.0.5 (2017-05-18)
 
 *   Bugfix: don't include `://` in the list of currently open Safari tabs.
