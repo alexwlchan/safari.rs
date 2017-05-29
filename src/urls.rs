@@ -322,4 +322,19 @@ tidy_url_tests! {
     "http://stackoverflow.com/questions/82831/how-do-i-check-whether-a-file-exists-using-python#82852",
     "http://stackoverflow.com/a/82852/1558022"
   ),
+
+  sff_se_non_question: (
+    "https://scifi.stackexchange.com/review",
+    "https://scifi.stackexchange.com/review"
+  ),
+
+  sff_se_question: (
+    "https://scifi.stackexchange.com/questions/58980/how-did-lupin-forget-there-was-a-full-moon",
+    "https://scifi.stackexchange.com/q/58980/3567"
+  ),
+
+  sff_se_answer: (
+    "https://scifi.stackexchange.com/questions/39201/which-owls-did-fred-and-george-weasley-achieve/39218#39218",
+    "https://scifi.stackexchange.com/a/39218/3567"
+  ),
 }
