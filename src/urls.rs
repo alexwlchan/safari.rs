@@ -123,6 +123,7 @@ pub fn tidy_url(url: &str) -> String {
   // Convert links to questions on Stack Overflow to insert my sharing
   // link for the Announcer badge.
   fix_se_referral(&mut parsed_url, "stackoverflow.com", "1558022");
+  fix_se_referral(&mut parsed_url, "scifi.stackexchange.com", "3567");
 
   urlunparse(parsed_url)
 }
