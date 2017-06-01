@@ -25,4 +25,4 @@ for account in soup.find_all('div', attrs={'class': 'account-container'}):
     user_page_url = account.find('h2').find('a').attrs['href']
     components = urlparse(user_page_url)
     user_id = components.path.split('/')[2]
-    print(f'fix_se_referral(&mut parsed_url, "{components.netloc}.com", "{user_id}");')
+    print(f'fix_se_referral(&mut parsed_url, "{components.netloc}", "{user_id}");')
