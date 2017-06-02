@@ -21,8 +21,12 @@ se_account_url = sys.argv[1]
 resp = requests.get(se_account_url, params={'tab': 'accounts'})
 
 soup = bs4.BeautifulSoup(resp.text, 'html.parser')
+accounts = []
 for account in soup.find_all('div', attrs={'class': 'account-container'}):
     user_page_url = account.find('h2').find('a').attrs['href']
     components = urlparse(user_page_url)
     user_id = components.path.split('/')[2]
-    print(f'fix_se_referral(&mut parsed_url, "{components.netloc}", "{user_id}");')
+    accounts.append((components.netloc, user_id))
+
+for netloc, user_id in sorted(accounts):
+    print(f'fix_se_referral(&mut parsed_url, "{netloc}", "{user_id}");')
