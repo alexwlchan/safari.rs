@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.7 (2017-06-02)
+
+*   URL tweak: all stackexchange.com URLs now use the referral links.
+
 ## v2.0.6 (2017-05-29)
 
 *   URL tweak: scifi.stackexchange.com URLs now uses the Share links provided for SFF.SE referrals.
