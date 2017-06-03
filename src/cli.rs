@@ -1,7 +1,20 @@
+use std::io::Write;
+
 use docopt::{Docopt, Error};
+
+
+// https://stackoverflow.com/a/27590832/1558022
+macro_rules! println_stderr(
+    ($($arg:tt)*) => { {
+        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
+        r.expect("failed printing to stderr");
+    } }
+);
+
 
 const USAGE: &str = "
 Usage: <NAME> url [--window=<WINDOW> [--tab=<TAB>]]
+       <NAME> list-tabs
        <NAME> urls-all
        <NAME> close-tabs <urls-to-close>
        <NAME> reading-list
@@ -21,7 +34,8 @@ Options:
 
 Commands:
     url           Print a URL from an open Safari tab.
-    urls-all      Prints a list of URLs from every open Safari tab.
+    list-tabs     Prints a list of URLs from every open Safari tab.
+    urls-all      Same as urls-all.  Deprecated.
     close-tabs    Close any tabs with the given URLs.
     reading-list  Print a list of URLs from Reading List.
     icloud-tabs   Get a list of URLs from iCloud Tabs.  Default is to list URLs
@@ -32,6 +46,7 @@ Commands:
 pub struct Args {
   pub cmd_url: bool,
   pub cmd_urls_all: bool,
+  pub cmd_list_tabs: bool,
   pub cmd_close_tabs: bool,
   pub cmd_icloud_tabs: bool,
   pub cmd_reading_list: bool,
@@ -77,6 +92,12 @@ pub fn parse_args(name: &str) -> Args {
     if args.flag_tab.is_some() && args.flag_window.is_none() {
       Error::Usage("Cannot use --tab without --window.".to_string()).exit();
     }
+  }
+
+  if args.cmd_urls_all {
+    println_stderr!("The --urls-all flag is deprecated; please use --list-tabs.");
+    args.cmd_urls_all = false;
+    args.cmd_list_tabs = true;
   }
 
   args
