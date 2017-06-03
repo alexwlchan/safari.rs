@@ -14,6 +14,7 @@ macro_rules! println_stderr(
 
 const USAGE: &str = "
 Usage: <NAME> url [--window=<WINDOW> [--tab=<TAB>]]
+       <NAME> tidy-url <url>
        <NAME> list-tabs
        <NAME> urls-all
        <NAME> close-tabs <urls-to-close>
@@ -34,6 +35,7 @@ Options:
 
 Commands:
     url           Print a URL from an open Safari tab.
+    tidy-url      Remove tracking junk, mobile, links, etc. from a URL.
     list-tabs     Prints a list of URLs from every open Safari tab.
     urls-all      Same as urls-all.  Deprecated.
     close-tabs    Close any tabs with the given URLs.
@@ -45,6 +47,7 @@ Commands:
 #[derive(Debug, RustcDecodable)]
 pub struct Args {
   pub cmd_url: bool,
+  pub cmd_tidy_url: bool,
   pub cmd_urls_all: bool,
   pub cmd_list_tabs: bool,
   pub cmd_close_tabs: bool,
@@ -55,6 +58,7 @@ pub struct Args {
   pub flag_version: bool,
   pub flag_list_devices: bool,
   pub flag_device: Option<String>,
+  pub arg_url: String,
   pub arg_urls_to_close: String,
 }
 

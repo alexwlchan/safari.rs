@@ -119,4 +119,8 @@ fn main() {
       }
     }
   }
+
+  if args.cmd_tidy_url {
+    print!("{}", urls::tidy_url(&args.arg_url));
+  }
 }
