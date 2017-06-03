@@ -12,7 +12,7 @@ Result = collections.namedtuple('Result', 'rc stdout stderr')
 ROOT = subprocess.check_output([
     'git', 'rev-parse', '--show-toplevel']).decode('ascii').strip()
 
-BINARY = os.path.join(ROOT, 'target', 'debug', 'safari')
+BINARY = os.path.join(ROOT, 'target', 'release', 'safari')
 
 
 subprocess.check_call(['cargo', 'build', '--release'], cwd=ROOT)
