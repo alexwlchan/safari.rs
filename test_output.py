@@ -21,6 +21,12 @@ class TestSafariRS(BaseTest):
         result = self.run_safari_rs('list-tabs')
         self.assertNotIn('deprecated', result.stderr)
 
+    def test_no_extra_whitespace_on_tidy_url(self):
+        result = self.run_safari_rs('tidy-url', 'https://github.com/alexwlchan/safari.rs/issues')
+        assert result.rc == 0
+        assert result.stderr == ''
+        assert result.stdout.strip() == result.stdout
+
 
 if __name__ == '__main__':
     unittest.main()
