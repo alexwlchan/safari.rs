@@ -6,14 +6,21 @@ They run the compiled binaries, and make assertions about the return code,
 stdout and stderr.
 """
 
-from conftest import run_safari_rs
+import unittest
+
+from conftest import BaseTest
 
 
-def test_urls_all_flag_is_deprecated():
-    result = run_safari_rs('urls-all')
-    assert 'deprecated' in result.stderr
+class TestSafariRS(BaseTest):
+
+    def test_urls_all_flag_is_deprecated(self):
+        result = self.run_safari_rs('urls-all')
+        self.assertIn('deprecated', result.stderr)
+
+    def test_list_tabs_flag_is_deprecated(self):
+        result = self.run_safari_rs('list-tabs')
+        self.assertEqual(result.stderr, '')
 
 
-def test_list_tabs_flag_is_deprecated():
-    result = run_safari_rs('list-tabs')
-    assert result.stderr == ''
+if __name__ == '__main__':
+    unittest.main()

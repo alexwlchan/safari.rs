@@ -4,6 +4,7 @@
 import collections
 import os
 import subprocess
+import unittest
 
 
 Result = collections.namedtuple('Result', 'rc stdout stderr')
@@ -17,14 +18,16 @@ BINARY = os.path.join(ROOT, 'target', 'debug', 'safari')
 subprocess.check_call(['cargo', 'build', '--release'], cwd=ROOT)
 
 
-def run_safari_rs(*args):
-    proc = subprocess.Popen([BINARY] + list(args),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    stdout, stderr = proc.communicate()
-    return Result(
-        rc=proc.returncode,
-        stdout=stdout.decode('ascii'),
-        stderr=stderr.decode('ascii')
-    )
+class BaseTest(unittest.TestCase):
+
+    def run_safari_rs(self, *args):
+        proc = subprocess.Popen([BINARY] + list(args),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = proc.communicate()
+        return Result(
+            rc=proc.returncode,
+            stdout=stdout.decode('ascii'),
+            stderr=stderr.decode('ascii')
+        )
