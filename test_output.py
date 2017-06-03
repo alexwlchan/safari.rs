@@ -17,9 +17,9 @@ class TestSafariRS(BaseTest):
         result = self.run_safari_rs('urls-all')
         self.assertIn('deprecated', result.stderr)
 
-    def test_list_tabs_flag_is_deprecated(self):
+    def test_list_tabs_flag_is_not_deprecated(self):
         result = self.run_safari_rs('list-tabs')
-        self.assertEqual(result.stderr, '')
+        self.assertNotIn('deprecated', result.stderr)
 
 
 if __name__ == '__main__':
