@@ -5,6 +5,9 @@
 *   Deprecation: the `urls-all` command has been replaced by `list-tabs`.
     This reverts the change in v2.0, because I kept trying to use the old command, and realised I actually prefer the old command.
     ([#41](https://github.com/alexwlchan/safari.rs/pull/41))
+*   New command: the `tidy-url` command can take a URL as an argument, and
+    pass it through the URL cleaning pipeline.
+    ([#43](https://github.com/alexwlchan/safari.rs/pull/43))
 
 ## v2.0.7 (2017-06-02)
 
