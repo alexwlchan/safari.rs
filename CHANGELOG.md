@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.0-dev
+
+*   Deprecation: the `urls-all` command has been replaced by `list-tabs`.
+    This reverts the change in v2.0, because I kept trying to use the old command, and realised I actually prefer the old command.
+    ([#41](https://github.com/alexwlchan/safari.rs/pull/41))
+
 ## v2.0.7 (2017-06-02)
 
 *   URL tweak: all stackexchange.com URLs now use the referral links.
