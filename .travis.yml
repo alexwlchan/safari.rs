@@ -11,6 +11,10 @@ rust:
   - beta
   - nightly
 
+script:
+  - cargo test
+  - python test_output.py
+
 matrix:
   allow_failures:
     - rust: nightly
