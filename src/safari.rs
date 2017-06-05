@@ -49,16 +49,30 @@ pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> 
   // document, you can construct a permalink, it's just a tad fiddly.
   match result {
     Ok(r) => {
-      if r == "https://wellcomeimages.org/" {
-        let re = Regex::new(r"(?:L|M)\d+").unwrap();
-        let text = get_property(window, tab, "text").unwrap();
-        let lib_number = re.find(&text).unwrap().as_str();
-        Ok(format!("https://wellcomeimages.org/indexplus/image/{}.html", lib_number))
+      let final_url = if r == "https://wellcomeimages.org/" {
+        fetch_wellcome_images_url(&r, window, tab)
       } else {
-        Ok(urls::tidy_url(&r))
-      }
+        r
+      };
+      Ok(urls::tidy_url(&final_url))
     },
     Err(e) => Err(e),
+  }
+}
+
+
+/// Pages on wellcomeimages.org are loaded entirely within <iframe> tags.
+///
+/// It's possible to get a permalink, but you need to extract the library
+/// number from the iframe and construct the magic URL.
+/// See: https://wellcome.slack.com/archives/C1F45T5DJ/p1496650575688579
+fn fetch_wellcome_images_url(url: &str, window: Option<u32>, tab: Option<u32>) -> String {
+  let re = Regex::new(r"(?:L|M)\d+").unwrap();
+  let text = get_property(window, tab, "text").unwrap();
+  let lib_number = re.find(&text);
+  match lib_number {
+    Some(m) => format!("https://wellcomeimages.org/indexplus/image/{}.html", m.as_str()),
+    None => url.to_owned(),
   }
 }
 
