@@ -3,12 +3,11 @@ use std::env;
 use std::fs::File;
 use std::process;
 
-use applescript::{run as run_applescript};
-
 use plist::Plist;
-
+use regex::Regex;
 use tera::{Context, Tera};
 
+use applescript::{run as run_applescript};
 use urls;
 
 
@@ -45,13 +44,19 @@ pub fn is_safari_running() -> bool {
 pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> {
   let result = get_property(window, tab, "URL");
 
+  // Wellcome Images pages can be loaded entirely in frames, with no info
+  // in the URL to point you to the image.  If there's an L-number in the
+  // document, you can construct a permalink, it's just a tad fiddly.
   match result {
     Ok(r) => {
       if r == "https://wellcomeimages.org/" {
-        let text = get_property(window, tab, "text");
-        println!("{:?}", text);
+        let re = Regex::new(r"L\d+").unwrap();
+        let text = get_property(window, tab, "text").unwrap();
+        let l_number = re.find(&text).unwrap().as_str();
+        Ok(format!("https://wellcomeimages.org/indexplus/image/{}.html", l_number))
+      } else {
+        Ok(urls::tidy_url(&r))
       }
-      Ok(urls::tidy_url(&r))
     },
     Err(e) => Err(e),
   }

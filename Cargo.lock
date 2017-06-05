@@ -4,6 +4,7 @@ version = "2.1.0"
 dependencies = [
  "docopt 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "plist 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "regex 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "tera 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "urlencoding 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
