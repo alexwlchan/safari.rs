@@ -53,8 +53,8 @@ pub struct Args {
   pub cmd_close_tabs: bool,
   pub cmd_icloud_tabs: bool,
   pub cmd_reading_list: bool,
-  pub flag_window: Option<i32>,
-  pub flag_tab: Option<i32>,
+  pub flag_window: Option<u32>,
+  pub flag_tab: Option<u32>,
   pub flag_version: bool,
   pub flag_list_devices: bool,
   pub flag_device: Option<String>,
@@ -74,9 +74,6 @@ pub fn parse_args(name: &str) -> Args {
       Some(v) => {
         if v == 0 {
           args.flag_window = None;
-        } else if v < 0 {
-          let err_message = format!("--window must be greater than 0; got {}.", v);
-          Error::Usage(err_message).exit();
         };
       },
       None => {},
@@ -85,9 +82,6 @@ pub fn parse_args(name: &str) -> Args {
       Some(v) => {
         if v == 0 {
           args.flag_tab = None;
-        } else if v < 0 {
-          let err_message = format!("--tab must be greater than 0; got {}.", v);
-          Error::Usage(err_message).exit();
         };
       },
       None => {},

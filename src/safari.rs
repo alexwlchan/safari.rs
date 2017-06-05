@@ -42,12 +42,12 @@ pub fn is_safari_running() -> bool {
 ///              frontmost window.
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
-pub fn get_url(window: Option<i32>, tab: Option<i32>) -> Result<String, String> {
+pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> {
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {
       match tab {
-        Some(t_idx) => format!("tell application \"Safari\" to get tab {} of window {}", t_idx, w_idx),
+        Some(t_idx) => format!("tell application \"Safari\" to get URL of tab {} of window {}", t_idx, w_idx),
         None => format!("tell application \"Safari\" to get URL of document {}", w_idx),
       }
     },
@@ -73,82 +73,18 @@ pub fn get_url(window: Option<i32>, tab: Option<i32>) -> Result<String, String> 
 /// order depends on AppleScript, which I don't think is guaranteed to be
 /// stable (in particular, I think it depends on which window is frontmost).
 ///
-pub fn get_all_urls() -> Result<Vec<String>, String> {
-  let script = include_str!("scripts/list-open-tabs.scpt");
-  let output = run_applescript(&script);
-  if output.status.success() {
-    Ok(parse_list_open_tabs_output(&output.stdout))
-  } else {
-    error!("Unexpected error from osascript: {:?}", output.stderr);
-  }
-}
-
-
-/// Given AppleScript output from list-open-tabs.scpt, return a list of URLs.
-fn parse_list_open_tabs_output(stdout: &str) -> Vec<String> {
-  stdout
-    .trim()
-    .split(", ")
-    .map(|url| urls::tidy_url(url))
-    .filter(|url| url != "favorites://")
-    .filter(|url| url != "://missing value")
-    .filter(|url| url != "://")
-    .collect()
-}
-
-
-macro_rules! parse_list_open_tabs_output_tests {
-  ($($name:ident: $value:expr,)*) => {
-    $(
-      #[test]
-      fn $name() {
-        let (input, expected) = $value;
-        assert_eq!(expected, parse_list_open_tabs_output(input));
+pub fn get_all_urls() -> Vec<String> {
+  let windows = get_window_tab_count_pairs();
+  let mut urls = vec![];
+  for window in windows {
+    for tab in 1..window.tab_count {
+      match get_url(Some(window.window_index), Some(tab)) {
+        Ok(u) => urls.push(u),
+        Err(_) => {},
       }
-    )*
+    }
   }
-}
-
-
-parse_list_open_tabs_output_tests! {
-
-  // I don't have a good way to put an empty vector on the right-hand side of
-  // this comparison, so no test checks for nothing (yet).
-
-  favorites_with_url: (
-    "favorites://, http://example.org",
-    vec!["http://example.org"]
-  ),
-
-  url_with_missing_value: (
-    "://missing value, https://www.example.net",
-    vec!["https://www.example.net"]
-  ),
-
-  single_url: (
-    "http://foo_bar.com",
-    vec!["http://foo_bar.com"]
-  ),
-
-  multiple_urls: (
-    "http://example.org, https://www.example.net, http://test.co.uk",
-    vec!["http://example.org", "https://www.example.net", "http://test.co.uk"]
-  ),
-
-  with_extra_whitespace: (
-    "    http://space.org, https://www.nasa.gov   ",
-    vec!["http://space.org", "https://www.nasa.gov"]
-  ),
-
-  applies_tidy_url_transform: (
-    "https://mobile.twitter.com",
-    vec!["https://twitter.com"]
-  ),
-
-  colon_slash_slash_with_url: (
-    "://, http://example.org",
-    vec!["http://example.org"]
-  ),
+  urls
 }
 
 
@@ -464,4 +400,39 @@ pub fn get_icloud_tabs_urls() -> Result<HashMap<String, Vec<String>>, String> {
     result.insert(name, urls);
   }
   Ok(result)
+}
+
+
+struct SafariWindow {
+  window_index: u32,
+  tab_count: u32,
+}
+
+
+/// Get a list of (window, tab_count) pairs for the currently running
+/// version of Safari.
+///
+/// There are lots of bugs in Safari's AppleScript handler, so knowing
+/// that there are N windows does not imply you can look up the tabs for
+/// each window 1, ..., N.  There might be gaps -- looking up a window
+/// in the middle could crash the AppleScript handler.
+fn get_window_tab_count_pairs() -> Vec<SafariWindow> {
+  let mut pairs = vec![];
+  let r = run_applescript(
+    "tell application \"Safari\" to get count of windows"
+  );
+  let window_count = r.stdout.trim().parse::<u32>().unwrap();
+  for window in 1..(window_count + 1) {
+    let r = run_applescript(
+      &format!("tell application \"Safari\" to get count of tabs of window {}",
+               window)
+    );
+    if r.status.success() {
+      pairs.push(SafariWindow {
+        window_index: window,
+        tab_count: r.stdout.trim().parse::<u32>().unwrap(),
+      });
+    }
+  }
+  pairs
 }
