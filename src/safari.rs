@@ -465,3 +465,38 @@ pub fn get_icloud_tabs_urls() -> Result<HashMap<String, Vec<String>>, String> {
   }
   Ok(result)
 }
+
+
+struct SafariWindow {
+  window_index: u32,
+  tab_count: u32,
+}
+
+
+/// Get a list of (window, tab_count) pairs for the currently running
+/// version of Safari.
+///
+/// There are lots of bugs in Safari's AppleScript handler, so knowing
+/// that there are N windows does not imply you can look up the tabs for
+/// each window 1, ..., N.  There might be gaps -- looking up a window
+/// in the middle could crash the AppleScript handler.
+fn get_window_tab_count_pairs() -> Vec<SafariWindow> {
+  let mut pairs = vec![];
+  let r = run_applescript(
+    "tell application \"Safari\" to get count of windows"
+  );
+  let window_count = r.stdout.trim().parse::<u32>().unwrap();
+  for window in 1..(window_count + 1) {
+    let r = run_applescript(
+      &format!("tell application \"Safari\" to get count of tabs of window {}",
+               window)
+    );
+    if r.status.success() {
+      pairs.push(SafariWindow {
+        window_index: window,
+        tab_count: r.stdout.trim().parse::<u32>().unwrap(),
+      });
+    }
+  }
+  pairs
+}
