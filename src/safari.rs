@@ -50,10 +50,10 @@ pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> 
   match result {
     Ok(r) => {
       if r == "https://wellcomeimages.org/" {
-        let re = Regex::new(r"L\d+").unwrap();
+        let re = Regex::new(r"(?:L|M)\d+").unwrap();
         let text = get_property(window, tab, "text").unwrap();
-        let l_number = re.find(&text).unwrap().as_str();
-        Ok(format!("https://wellcomeimages.org/indexplus/image/{}.html", l_number))
+        let lib_number = re.find(&text).unwrap().as_str();
+        Ok(format!("https://wellcomeimages.org/indexplus/image/{}.html", lib_number))
       } else {
         Ok(urls::tidy_url(&r))
       }
