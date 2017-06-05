@@ -42,7 +42,7 @@ pub fn is_safari_running() -> bool {
 ///              frontmost window.
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
-pub fn get_url(window: Option<i32>, tab: Option<i32>) -> Result<String, String> {
+pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> {
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {
