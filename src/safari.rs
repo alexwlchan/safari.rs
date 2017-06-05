@@ -43,15 +43,35 @@ pub fn is_safari_running() -> bool {
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
 pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> {
+  get_property(window, tab, "URL")
+}
+
+
+/// Look up a property on a Safari window.
+///
+/// Given a (window, tab) pair, this function looks up the property of that tab.
+/// Note that it doesn't do any error handling, so will throw an execution
+/// error if it fails.
+///
+/// * `window` - Window index.  1 is frontmost.  If None, assumes the
+///              frontmost window.
+/// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
+/// * `property` - Name of the property, as defined in the OSA scripting
+///       dictionary.  One of `URL`, `source` or `text`.
+///
+fn get_property(window: Option<u32>, tab: Option<u32>, property: &str) -> Result<String, String> {
+  if (property != "URL") && (property != "source") && (property != "text") {
+    error!("Unrecognised property: {:?}", property)
+  }
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {
       match tab {
-        Some(t_idx) => format!("tell application \"Safari\" to get URL of tab {} of window {}", t_idx, w_idx),
-        None => format!("tell application \"Safari\" to get URL of document {}", w_idx),
+        Some(t_idx) => format!("tell application \"Safari\" to get {} of tab {} of window {}", property, t_idx, w_idx),
+        None => format!("tell application \"Safari\" to get {} of document {}", property, w_idx),
       }
     },
-    None => "tell application \"Safari\" to get URL of document 1".to_string(),
+    None => format!("tell application \"Safari\" to get {} of document 1", property),
   };
   let output = run_applescript(&command);
 
@@ -63,6 +83,19 @@ pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> 
     } else {
       error!("Unexpected error from osascript: {:?}", output.stderr)
     }
+  }
+}
+
+
+/// Tests for get_property().
+#[cfg(test)]
+mod tests_property {
+  use safari::get_property;
+
+  #[test]
+  fn test_invalid_property_is_rejected() {
+    let result = get_property(None, None, "fooble");
+    assert!(result.is_err());
   }
 }
 
