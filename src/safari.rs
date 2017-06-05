@@ -43,7 +43,18 @@ pub fn is_safari_running() -> bool {
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
 pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> {
-  get_property(window, tab, "URL")
+  let result = get_property(window, tab, "URL");
+
+  match result {
+    Ok(r) => {
+      if r == "https://wellcomeimages.org/" {
+        let text = get_property(window, tab, "text");
+        println!("{:?}", text);
+      }
+      Ok(urls::tidy_url(&r))
+    },
+    Err(e) => Err(e),
+  }
 }
 
 
@@ -76,7 +87,7 @@ fn get_property(window: Option<u32>, tab: Option<u32>, property: &str) -> Result
   let output = run_applescript(&command);
 
   if output.status.success() {
-    Ok(urls::tidy_url(output.stdout.trim()))
+    Ok(output.stdout.trim().to_owned())
   } else {
     if output.stderr.contains("Invalid index") {
       error!("Invalid index: no such window or tab.")
