@@ -1,11 +1,12 @@
 [package]
 name = "safari"
-version = "2.1.0"
+version = "2.1.1"
 authors = ["Alex Chan <alex@alexwlchan.net>"]
 
 [dependencies]
 docopt = "0.7"
 plist = "0.1"
+regex = "0.2.1"
 rustc-serialize = "0.3"
 tera = "0.7.2"
 urlencoding = "0.2"

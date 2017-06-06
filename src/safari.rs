@@ -3,12 +3,11 @@ use std::env;
 use std::fs::File;
 use std::process;
 
-use applescript::{run as run_applescript};
-
 use plist::Plist;
-
+use regex::Regex;
 use tera::{Context, Tera};
 
+use applescript::{run as run_applescript};
 use urls;
 
 
@@ -43,7 +42,38 @@ pub fn is_safari_running() -> bool {
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
 ///
 pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> {
-  get_property(window, tab, "URL")
+  let result = get_property(window, tab, "URL");
+
+  // Wellcome Images pages can be loaded entirely in frames, with no info
+  // in the URL to point you to the image.  If there's an L-number in the
+  // document, you can construct a permalink, it's just a tad fiddly.
+  match result {
+    Ok(r) => {
+      let final_url = if r == "https://wellcomeimages.org/" {
+        fetch_wellcome_images_url(&r, window, tab)
+      } else {
+        r
+      };
+      Ok(urls::tidy_url(&final_url))
+    },
+    Err(e) => Err(e),
+  }
+}
+
+
+/// Pages on wellcomeimages.org are loaded entirely within <iframe> tags.
+///
+/// It's possible to get a permalink, but you need to extract the library
+/// number from the iframe and construct the magic URL.
+/// See: https://wellcome.slack.com/archives/C1F45T5DJ/p1496650575688579
+fn fetch_wellcome_images_url(url: &str, window: Option<u32>, tab: Option<u32>) -> String {
+  let re = Regex::new(r"(?:L|M)\d+").unwrap();
+  let text = get_property(window, tab, "text").unwrap();
+  let lib_number = re.find(&text);
+  match lib_number {
+    Some(m) => format!("https://wellcomeimages.org/indexplus/image/{}.html", m.as_str()),
+    None => url.to_owned(),
+  }
 }
 
 
@@ -76,7 +106,7 @@ fn get_property(window: Option<u32>, tab: Option<u32>, property: &str) -> Result
   let output = run_applescript(&command);
 
   if output.status.success() {
-    Ok(urls::tidy_url(output.stdout.trim()))
+    Ok(output.stdout.trim().to_owned())
   } else {
     if output.stderr.contains("Invalid index") {
       error!("Invalid index: no such window or tab.")

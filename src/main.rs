@@ -2,6 +2,7 @@
 
 extern crate docopt;
 extern crate plist;
+extern crate regex;
 extern crate rustc_serialize;
 extern crate tera;
 extern crate urlencoding;

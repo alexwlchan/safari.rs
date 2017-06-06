@@ -1,6 +1,11 @@
 # Changelog
 
-## v2.1.0-dev
+## v2.1.1 (2017-06-05)
+
+*   URL tweak: most of `wellcomeimages.org` is loaded entirely in `<iframe>` tags, and the page URL doesn't change.
+    This isn't very useful, so now the tool will attempt to guess a sensible permalink on image pages, based on the HTML.
+
+## v2.1.0 (2017-06-03)
 
 *   Deprecation: the `urls-all` command has been replaced by `list-tabs`.
     This reverts the change in v2.0, because I kept trying to use the old command, and realised I actually prefer the old command.
