@@ -55,6 +55,10 @@ fn main() {
     };
   }
 
+  if args.cmd_resolve {
+    print!("{}", args.arg_url);
+  }
+
   if args.cmd_list_tabs {
     assert_safari_is_running();
     for url in safari::get_all_urls() {

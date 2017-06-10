@@ -15,6 +15,7 @@ macro_rules! println_stderr(
 const USAGE: &str = "
 Usage: <NAME> url [--window=<WINDOW> [--tab=<TAB>]]
        <NAME> tidy-url <url>
+       <NAME> resolve <url>
        <NAME> list-tabs
        <NAME> urls-all
        <NAME> close-tabs <urls-to-close>
@@ -35,6 +36,7 @@ Options:
 
 Commands:
     url           Print a URL from an open Safari tab.
+    resolve       Follow redirects and print the final location of a URL.
     tidy-url      Remove tracking junk, mobile, links, etc. from a URL.
     list-tabs     Prints a list of URLs from every open Safari tab.
     urls-all      Same as urls-all.  Deprecated.
@@ -48,6 +50,7 @@ Commands:
 pub struct Args {
   pub cmd_url: bool,
   pub cmd_tidy_url: bool,
+  pub cmd_resolve: bool,
   pub cmd_urls_all: bool,
   pub cmd_list_tabs: bool,
   pub cmd_close_tabs: bool,
