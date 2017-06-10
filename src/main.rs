@@ -3,6 +3,7 @@
 extern crate docopt;
 extern crate plist;
 extern crate regex;
+extern crate reqwest;
 extern crate rustc_serialize;
 extern crate tera;
 extern crate urlencoding;
@@ -56,7 +57,7 @@ fn main() {
   }
 
   if args.cmd_resolve {
-    print!("{}", args.arg_url);
+    print!("{}", urls::resolve(&args.arg_url));
   }
 
   if args.cmd_list_tabs {
