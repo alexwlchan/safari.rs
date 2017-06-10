@@ -202,7 +202,7 @@ pub fn close_tabs(url_patterns: Vec<&str>) {
   let clean_tabs_template = include_str!("scripts/clean-tabs.scpt");
   let mut context = Context::new();
   context.add("conditions", &conditions);
-  let script = Tera::one_off(&clean_tabs_template, context, false).unwrap();
+  let script = Tera::one_off(&clean_tabs_template, &context, false).unwrap();
 
   // Run it twice to get around weird AppleScript bugs.
   run_applescript(&script);
