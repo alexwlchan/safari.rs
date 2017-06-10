@@ -407,4 +407,14 @@ tidy_url_tests! {
     "https://scifi.stackexchange.com/questions/39201/which-owls-did-fred-and-george-weasley-achieve/39218#39218",
     "https://scifi.stackexchange.com/a/39218/3567"
   ),
+
+  telegraph_bare: (
+    "http://www.telegraph.co.uk/news/2017/06/09/ruth-davidson-planning-scottish-tory-breakaway-challenges-theresa/",
+    "http://www.telegraph.co.uk/news/2017/06/09/ruth-davidson-planning-scottish-tory-breakaway-challenges-theresa/"
+  ),
+
+  strip_telegraph_tracking: (
+    "http://www.telegraph.co.uk/news/2017/06/09/ruth-davidson-planning-scottish-tory-breakaway-challenges-theresa/?WT.mc_id=tmg_share_tw",
+    "http://www.telegraph.co.uk/news/2017/06/09/ruth-davidson-planning-scottish-tory-breakaway-challenges-theresa/"
+  ),
 }
