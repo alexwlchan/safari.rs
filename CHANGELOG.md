@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.1.2 (2017-06-10)
+
+*   URL tweak: remove tracking parameters from URLs on `telegraph.co.uk`.
+    ([#48](https://github.com/alexwlchan/safari.rs/issues/48))
+
 ## v2.1.1 (2017-06-05)
 
 *   URL tweak: most of `wellcomeimages.org` is loaded entirely in `<iframe>` tags, and the page URL doesn't change.

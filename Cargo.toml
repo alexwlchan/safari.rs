@@ -1,6 +1,6 @@
 [package]
 name = "safari"
-version = "2.1.1"
+version = "2.1.2"
 authors = ["Alex Chan <alex@alexwlchan.net>"]
 
 [dependencies]
