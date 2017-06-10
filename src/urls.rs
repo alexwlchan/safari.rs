@@ -73,14 +73,7 @@ pub fn tidy_url(url: &str) -> String {
 
   // Remove &feature=youtu.be from YouTube URLs
   if parsed_url.netloc.ends_with("youtube.com") {
-    parsed_url.query = match parsed_url.query {
-      Some(qs) => {
-        let mut query = parse_qs(&qs);
-        query.remove("feature");
-        encode_querystring(query)
-      },
-      None => None,
-    };
+    remove_query_param(&mut parsed_url, "feature");
   }
 
   // Remove any UTM tracking parameters from URLs
@@ -110,27 +103,13 @@ pub fn tidy_url(url: &str) -> String {
     };
 
     // Scrap the highlight
-    parsed_url.query = match parsed_url.query {
-      Some(qs) => {
-        let mut query = parse_qs(&qs);
-        query.remove("highlight");
-        encode_querystring(query)
-      },
-      None => None,
-    };
+    remove_query_param(&mut parsed_url, "highlight");
   }
 
   // Remove tracking query parameters from telegraph.co.uk URLs
   // https://github.com/alexwlchan/safari.rs/issues/48
   if parsed_url.netloc == "www.telegraph.co.uk" {
-    parsed_url.query = match parsed_url.query {
-      Some(qs) => {
-        let mut query = parse_qs(&qs);
-        query.remove("WT.mc_id");
-        encode_querystring(query)
-      },
-      None => None
-    };
+    remove_query_param(&mut parsed_url, "WT.mc_id");
   }
 
   // Convert links to questions on Stack Overflow to insert my sharing
@@ -208,6 +187,23 @@ pub fn tidy_url(url: &str) -> String {
   fix_se_referral(&mut parsed_url, "writers.stackexchange.com", "11018");
 
   urlunparse(parsed_url)
+}
+
+
+/// Remove a query parameter from a URL.
+///
+/// - `parsed_url` - the `Url` structure returned by urlparse
+/// - `query_param` - name of the query parameter to remove.
+///
+fn remove_query_param(parsed_url: &mut Url, query_param: &str) {
+  parsed_url.query = match parsed_url.query {
+    Some(ref qs) => {
+      let mut query = parse_qs(&qs);
+      query.remove(query_param);
+      encode_querystring(query)
+    },
+    None => None
+  };
 }
 
 
