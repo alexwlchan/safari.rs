@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.1-dev
+
+*   URL tweak: don't mangle Stack Exchange URLs which point to a comment.
+    ([#52](https://github.com/alexwlchan/safari.rs/issues/52))
+
 ## v2.2.0 (2017-06-10)
 
 *   New command: the `resolve` command can take a URL as an argument, and print to stdout the final location of that URL after following any redirects.
