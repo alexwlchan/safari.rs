@@ -25,7 +25,7 @@ safari.rs provides some tools for interacting with Safari on the command-line.
 2.  Get a list of URLs from every open tab:
 
     ```console
-    $ safari urls-all
+    $ safari list-tabs
     https://github.com
     https://example.com/foo
     https://crates.io/crates/urlparse
@@ -75,13 +75,9 @@ Tested with Rust 1.17.0
 
 The commands that produce URLs do a bit of cleaning before they return:
 
-*   Twitter links to the mobile site (`mobile.twitter.com`) are flipped to
-    point to the desktop site (`twitter.com`).
-*   Tracking data is partially stripped from Amazon, Buzzfeed, Mashable and
-    Medium URLs.
-*   Any UTM tracking parameters in the query string are removed.
-*   The `#notes` fragment is removed from Tumblr URLs.
-*   The `feature=youtu.be` query parameter is removed from YouTube URLs.
+*   Convert links for a mobile site to the desktop site – for example, converting `mobile.twitter.com` to `twitter.com`.
+*   Stripping tracking junk (e.g. UTM tracking parameters) from URLs.
+*   Removing some extraneous information that isn't generally useful.
 
 ## Motivation
 
@@ -100,4 +96,4 @@ Why Rust?
 
 ## License
 
-MIT license.
+MIT.
