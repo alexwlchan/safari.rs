@@ -251,7 +251,10 @@ fn fix_se_referral(parsed_url: &mut Url, hostname: &str, user_id: &str) {
         Ok(q_id) => {
           // Check if there's an answer fragment
           match parsed_url.fragment.to_owned() {
-            Some(ans_id) => Some(format!("/a/{}/{}", ans_id, user_id)),
+            Some(fragment) => match fragment.parse::<i32>() {
+              Ok(ans_id) => Some(format!("/a/{}/{}", ans_id, user_id)),
+              Err(_) => None,
+            },
             None => Some(format!("/q/{}/{}", q_id, user_id)),
           }
         },
@@ -439,5 +442,10 @@ tidy_url_tests! {
   strip_telegraph_tracking: (
     "http://www.telegraph.co.uk/news/2017/06/09/ruth-davidson-planning-scottish-tory-breakaway-challenges-theresa/?WT.mc_id=tmg_share_tw",
     "http://www.telegraph.co.uk/news/2017/06/09/ruth-davidson-planning-scottish-tory-breakaway-challenges-theresa/"
+  ),
+
+  se_comments: (
+    "https://stackoverflow.com/questions/406230/regular-expression-to-match-a-line-that-doesnt-contain-a-word#comment9209422_406230",
+    "https://stackoverflow.com/questions/406230/regular-expression-to-match-a-line-that-doesnt-contain-a-word#comment9209422_406230"
   ),
 }
