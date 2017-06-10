@@ -27,6 +27,21 @@ class TestSafariRS(BaseTest):
         assert result.stderr == ''
         assert result.stdout.strip() == result.stdout
 
+    def _assert_resolve_tco(self, url, expected):
+        result = self.run_safari_rs('resolve', url)
+        assert result.rc == 0
+        assert result.stderr == ''
+        assert result.stdout == expected
+
+    def test_resolve_single_redirect(self):
+        self._assert_resolve_tco('https://t.co/2pciHpqpwC', 'https://donmelton.com/2013/06/04/remembering-penny/')
+
+    def test_resolve_multiple_redirect(self):
+        self._assert_resolve_tco('https://t.co/oSJaiNlIP6', 'https://bitly.com/blog/backlinking-strategy/')
+
+    def test_resolve_no_redirect(self):
+        self._assert_resolve_tco('https://example.org/', 'https://example.org/')
+
 
 if __name__ == '__main__':
     unittest.main()
