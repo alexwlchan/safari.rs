@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.0 (2017-06-10)
+
+*   New command: the `resolve` command can take a URL as an argument, and print to stdout the final location of that URL after following any redirects.
+    Useful for working with, e.g., `t.co` or `bit.ly` URLs.
+
 ## v2.1.2 (2017-06-10)
 
 *   URL tweak: remove tracking parameters from URLs on `telegraph.co.uk`.

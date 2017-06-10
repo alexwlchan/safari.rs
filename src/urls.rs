@@ -1,5 +1,19 @@
+use reqwest::Client;
+
 use urlencoding::{encode as urlencode};
 use urlparse::{Query, parse_qs, urlparse, urlunparse, Url};
+
+
+/// Follow redirects to resolve the final location of a URL
+pub fn resolve(url: &str) -> String {
+  let client = Client::new().unwrap();
+  client.head(url)
+        .send()
+        .unwrap()
+        .url()
+        .as_str()
+        .to_owned()
+}
 
 
 fn partial_urlencode(value: &str) -> String {
