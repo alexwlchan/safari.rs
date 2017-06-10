@@ -4,7 +4,8 @@ extern crate docopt;
 extern crate plist;
 extern crate regex;
 extern crate reqwest;
-extern crate rustc_serialize;
+#[macro_use]
+extern crate serde_derive;
 extern crate tera;
 extern crate urlencoding;
 extern crate urlparse;

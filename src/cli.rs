@@ -46,7 +46,7 @@ Commands:
                   from every device, or you can filter with the --device flag.
 ";
 
-#[derive(Debug, RustcDecodable)]
+#[derive(Debug, Deserialize)]
 pub struct Args {
   pub cmd_url: bool,
   pub cmd_tidy_url: bool,
@@ -67,7 +67,7 @@ pub struct Args {
 
 pub fn parse_args(name: &str) -> Args {
   let mut args: Args = Docopt::new(str::replace(USAGE, "<NAME>", name))
-                              .and_then(|d| d.decode())
+                              .and_then(|d| d.deserialize())
                               .unwrap_or_else(|e| e.exit());
 
   // 0 is the default value for the --window and --tab flags, so if we get
