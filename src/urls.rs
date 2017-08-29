@@ -459,6 +459,6 @@ tidy_url_tests! {
 
   ga_tracking_parameter_and_others: (
     "https://example.org?_ga=1234&foo=bar",
-    "https://exampke.org?foo=bar"
+    "https://example.org?foo=bar"
   ),
 }
