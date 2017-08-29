@@ -448,4 +448,14 @@ tidy_url_tests! {
     "https://stackoverflow.com/questions/406230/regular-expression-to-match-a-line-that-doesnt-contain-a-word#comment9209422_406230",
     "https://stackoverflow.com/questions/406230/regular-expression-to-match-a-line-that-doesnt-contain-a-word#comment9209422_406230"
   ),
+
+  ga_tracking_parameter: (
+    "https://example.org?_ga=1234",
+    "https://example.org"
+  ),
+
+  ga_tracking_parameter_and_others: (
+    "https://example.org?_ga=1234&foo=bar",
+    "https://exampke.org?foo=bar"
+  ),
 }
