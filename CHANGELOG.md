@@ -1,9 +1,9 @@
 # Changelog
 
-## v2.2.1-dev
+## v2.2.1 (2017-08-29)
 
-*   URL tweak: don't mangle Stack Exchange URLs which point to a comment.
-    ([#52](https://github.com/alexwlchan/safari.rs/issues/52))
+*   URL tweak: Remove the `_ga` tracking parameter from shared URLs.
+    ([#56](https://github.com/alexwlchan/safari.rs/issues/56))
 
 ## v2.2.0 (2017-06-10)
 
