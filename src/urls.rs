@@ -58,6 +58,11 @@ pub fn tidy_url(url: &str) -> String {
     parsed_url.netloc = String::from("twitter.com");
   }
 
+  // Always get the non-mobile version of nytimes.com URLs
+  if parsed_url.netloc == "mobile.nytimes.com" {
+    parsed_url.netloc = String::from("nytimes.com");
+  }
+
   // Remove any tracking junk from Amazon URLs so they're not a
   // ridiculous length
   if parsed_url.netloc == "www.amazon.co.uk" {
