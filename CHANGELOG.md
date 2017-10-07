@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.2 (2017-10-07)
+
+*   URL tweak: mobile.nytimes.com links are now replaced by non-mobile versions.
+    ([#59](https://github.com/alexwlchan/safari.rs/issues/59))
+
 ## v2.2.1 (2017-08-29)
 
 *   URL tweak: Remove the `_ga` tracking parameter from shared URLs.
