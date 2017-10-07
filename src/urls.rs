@@ -461,4 +461,14 @@ tidy_url_tests! {
     "https://example.org?_ga=1234&foo=bar",
     "https://example.org?foo=bar"
   ),
+
+  nytimes_mobile_url: (
+    "https://mobile.nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html",
+    "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html"
+  ),
+
+  nytimes_non_mobile_url: (
+    "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html",
+    "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html"
+  ),
 }
