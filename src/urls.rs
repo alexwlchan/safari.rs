@@ -58,6 +58,11 @@ pub fn tidy_url(url: &str) -> String {
     parsed_url.netloc = String::from("twitter.com");
   }
 
+  // Always get the non-mobile version of nytimes.com URLs
+  if parsed_url.netloc == "mobile.nytimes.com" {
+    parsed_url.netloc = String::from("nytimes.com");
+  }
+
   // Remove any tracking junk from Amazon URLs so they're not a
   // ridiculous length
   if parsed_url.netloc == "www.amazon.co.uk" {
@@ -460,5 +465,15 @@ tidy_url_tests! {
   ga_tracking_parameter_and_others: (
     "https://example.org?_ga=1234&foo=bar",
     "https://example.org?foo=bar"
+  ),
+
+  nytimes_mobile_url: (
+    "https://mobile.nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html",
+    "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html"
+  ),
+
+  nytimes_non_mobile_url: (
+    "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html",
+    "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html"
   ),
 }
