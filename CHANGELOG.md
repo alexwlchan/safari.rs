@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.3 (2018-05-22)
+
+*   URL tweak: links to the files tab of GitHub pull requests are now replaced
+    by links to the top of the pull request.
+
 ## v2.2.2 (2017-10-07)
 
 *   URL tweak: mobile.nytimes.com links are now replaced by non-mobile versions.

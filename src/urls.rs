@@ -125,6 +125,14 @@ pub fn tidy_url(url: &str) -> String {
     remove_query_param(&mut parsed_url, "highlight");
   }
 
+  // If I'm on a GitHub pull request and looking at the files tab,
+  // link to the top of the pull request.
+  if parsed_url.netloc == "github.com" {
+    if parsed_url.path.ends_with("/files") {
+      parsed_url.path = parsed_url.path.replace("/files", "");
+    }
+  }
+
   // Remove tracking query parameters from telegraph.co.uk URLs
   // https://github.com/alexwlchan/safari.rs/issues/48
   if parsed_url.netloc == "www.telegraph.co.uk" {
@@ -475,5 +483,15 @@ tidy_url_tests! {
   nytimes_non_mobile_url: (
     "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html",
     "https://nytimes.com/2017/02/24/style/modern-love-when-your-greatest-romance-is-friendship.html"
+  ),
+
+  github_pr: (
+    "https://github.com/wellcometrust/platform/pull/1892",
+    "https://github.com/wellcometrust/platform/pull/1892"
+  ),
+
+  github_pr_with_files: (
+    "https://github.com/wellcometrust/platform/pull/1892/files",
+    "https://github.com/wellcometrust/platform/pull/1892"
   ),
 }
