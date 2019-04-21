@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.4 (2019-04-21)
+
+*   URL tweak: strip tracking parameters from Etsy URLs.
+
 ## v2.2.3 (2018-05-22)
 
 *   URL tweak: links to the files tab of GitHub pull requests are now replaced

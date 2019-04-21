@@ -139,6 +139,30 @@ pub fn tidy_url(url: &str) -> String {
     remove_query_param(&mut parsed_url, "WT.mc_id");
   }
 
+  // Remove Google Analytics parameters from Etsy URLs.
+  if parsed_url.netloc == "www.etsy.com" {
+    parsed_url.query = match parsed_url.query {
+      Some(qs) => {
+        let mut query = parse_qs(&qs);
+        let utm_keys: Vec<_> = query
+          .keys()
+          .filter(|key|
+            key.starts_with("ga_") ||
+            key.starts_with("ref") ||
+            key.starts_with("organic_search_click")
+          )
+          .map(|k| k.clone())
+          .collect();
+        for key in utm_keys {
+          query.remove(&key);
+        }
+        encode_querystring(query)
+      },
+      None => None
+    };
+  }
+
+
   // Always remove the _ga Google Analytics tracking parameter.
   remove_query_param(&mut parsed_url, "_ga");
 
@@ -493,5 +517,10 @@ tidy_url_tests! {
   github_pr_with_files: (
     "https://github.com/wellcometrust/platform/pull/1892/files",
     "https://github.com/wellcometrust/platform/pull/1892"
+  ),
+
+  etsy_link: (
+    "https://www.etsy.com/uk/listing/473409127/space-sampler-cross-stitch-pattern-pdf?ga_order=most_relevant&ref=sr_gallery-1-3&ga_view_type=gallery&organic_search_click=1&ga_search_type=all&ga_search_query=space%20sampler",
+    "https://www.etsy.com/uk/listing/473409127/space-sampler-cross-stitch-pattern-pdf"
   ),
 }
