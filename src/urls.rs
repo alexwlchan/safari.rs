@@ -6,7 +6,7 @@ use urlparse::{Query, parse_qs, urlparse, urlunparse, Url};
 
 /// Follow redirects to resolve the final location of a URL
 pub fn resolve(url: &str) -> String {
-  let client = Client::new().unwrap();
+  let client = Client::new();
   client.head(url)
         .send()
         .unwrap()
