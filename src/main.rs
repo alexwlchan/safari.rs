@@ -1,5 +1,6 @@
 #![deny(warnings)]
 
+extern crate dirs;
 extern crate docopt;
 extern crate plist;
 extern crate regex;

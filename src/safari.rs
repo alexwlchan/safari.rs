@@ -1,5 +1,4 @@
 use std::collections::{BTreeMap, HashMap};
-use std::env;
 use std::fs::File;
 use std::process;
 
@@ -215,7 +214,7 @@ fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
 
   // All Safari data lives at ~/Library/Safari/Bookmarks.plist
   // TODO: There's probably a more idiomatic Rust-like way to write this.
-  let mut plist_path = match env::home_dir() {
+  let mut plist_path = match dirs::home_dir() {
     Some(v) => v,
     None => error!("Unable to get home directory?"),
   };
@@ -325,7 +324,7 @@ fn read_safari_plist() -> Result<BTreeMap<String, Plist>, String> {
 
   // All Safari data lives at ~/Library/Safari/Bookmarks.plist
   // TODO: There's probably a more idiomatic Rust-like way to write this.
-  let mut plist_path = match env::home_dir() {
+  let mut plist_path = match dirs::home_dir() {
     Some(v) => v,
     None => error!("Unable to get home directory?"),
   };

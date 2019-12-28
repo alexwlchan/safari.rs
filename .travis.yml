@@ -1,20 +1,14 @@
-language: rust
+language: "rust"
 
-cache: cargo
+cache: "cargo"
 
 branches:
   only:
     - "development"
 
 rust:
-  - stable
-  - beta
-  - nightly
+  - "stable"
 
 script:
-  - cargo test
-  - python test_output.py
-
-matrix:
-  allow_failures:
-    - rust: nightly
+  - "cargo test"
+  - "python test_output.py"
