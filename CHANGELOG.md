@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.6 (2019-12-29)
+
+*   URL tweak: strip the `app=` parameter from YouTube URLs.
+
 ## v2.2.5 (2019-12-28)
 
 *   URL tweak: strip more tracking parameters from Etsy URLs.

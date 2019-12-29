@@ -93,6 +93,7 @@ pub fn tidy_url(url: &str) -> String {
   // Remove &feature=youtu.be from YouTube URLs
   if parsed_url.netloc.ends_with("youtube.com") {
     remove_query_param(&mut parsed_url, "feature");
+    remove_query_param(&mut parsed_url, "app");
   }
 
   // Remove any UTM tracking parameters from URLs
@@ -395,6 +396,11 @@ tidy_url_tests! {
   youtube_channel: (
     "https://www.youtube.com/user/TheQIElves",
     "https://www.youtube.com/user/TheQIElves"
+  ),
+
+  youtube_with_app: (
+    "https://www.youtube.com/watch?app=desktop&v=51HbzsFhh04",
+    "https://www.youtube.com/watch?v=51HbzsFhh04"
   ),
 
   single_utm_tracker: (
