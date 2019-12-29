@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.5 (2019-12-28)
+
+*   URL tweak: strip more tracking parameters from Etsy URLs.
+
 ## v2.2.4 (2019-04-21)
 
 *   URL tweak: strip tracking parameters from Etsy URLs.

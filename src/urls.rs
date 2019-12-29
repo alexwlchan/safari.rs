@@ -141,6 +141,9 @@ pub fn tidy_url(url: &str) -> String {
 
   // Remove Google Analytics parameters from Etsy URLs.
   if parsed_url.netloc == "www.etsy.com" {
+    remove_query_param(&mut parsed_url, "awc");
+    remove_query_param(&mut parsed_url, "source");
+
     parsed_url.query = match parsed_url.query {
       Some(qs) => {
         let mut query = parse_qs(&qs);
@@ -522,5 +525,10 @@ tidy_url_tests! {
   etsy_link: (
     "https://www.etsy.com/uk/listing/473409127/space-sampler-cross-stitch-pattern-pdf?ga_order=most_relevant&ref=sr_gallery-1-3&ga_view_type=gallery&organic_search_click=1&ga_search_type=all&ga_search_query=space%20sampler",
     "https://www.etsy.com/uk/listing/473409127/space-sampler-cross-stitch-pattern-pdf"
+  ),
+
+  etsy_section_link: (
+    "https://www.etsy.com/uk/shop/Vitraaze?source=aw&section_id=17807678&awc=6091_1577546787_d9f1b918042bbd02fe406d61dae715e7",
+    "https://www.etsy.com/uk/shop/Vitraaze?section_id=17807678"
   ),
 }

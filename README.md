@@ -67,7 +67,7 @@ Then to install:
 $ cargo install --git https://github.com/alexwlchan/safari.rs
 ```
 
-Tested with Rust 1.17.0
+It's tested in Travis with the current version of stable Rust, but it only gets tested when it was last modified (at time of writing, that was Rust 1.40.0).
 
 [rust]: https://www.rust-lang.org/en-US/install.html
 
@@ -88,8 +88,7 @@ version in Rust.
 
 Why Rust?
 
-*   It's really fast.  The Rust script returns immediately – with some of
-    the other versions, I had a noticeable delay when typing `;furl`.
+*   It's really fast.  The Rust script returns immediately – when I tried writing this with Python, I had a noticeable delay when typing `;furl`.
 *   I like Rust, and I’ve been enjoying playing with it recently.
 
 [dr]: http://www.leancrew.com/all-this/2009/07/safari-tab-urls-via-textexpander/
