@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.7 (2020-01-12)
+
+*   URL tweak: strip the `m=` parameter from Blogspot URLs (so links are never mobile links).
+
 ## v2.2.6 (2019-12-29)
 
 *   URL tweak: strip the `app=` parameter from YouTube URLs.

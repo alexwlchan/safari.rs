@@ -166,6 +166,10 @@ pub fn tidy_url(url: &str) -> String {
     };
   }
 
+  // Un-mobile-ify blogspot links.
+  if parsed_url.netloc.ends_with("blogspot.com") {
+    remove_query_param(&mut parsed_url, "m");
+  }
 
   // Always remove the _ga Google Analytics tracking parameter.
   remove_query_param(&mut parsed_url, "_ga");
@@ -536,5 +540,15 @@ tidy_url_tests! {
   etsy_section_link: (
     "https://www.etsy.com/uk/shop/Vitraaze?source=aw&section_id=17807678&awc=6091_1577546787_d9f1b918042bbd02fe406d61dae715e7",
     "https://www.etsy.com/uk/shop/Vitraaze?section_id=17807678"
+  ),
+
+  blogspot: (
+    "https://example.blogspot.com/2020/01/01/my_first_post.html",
+    "https://example.blogspot.com/2020/01/01/my_first_post.html"
+  ),
+
+  blogspot_mobile_link: (
+    "https://example.blogspot.com/2020/01/01/my_first_post.html?m=1",
+    "https://example.blogspot.com/2020/01/01/my_first_post.html"
   ),
 }
