@@ -171,6 +171,12 @@ pub fn tidy_url(url: &str) -> String {
     remove_query_param(&mut parsed_url, "m");
   }
 
+  // Un-mobile-ify blogspot links.
+  if parsed_url.netloc == "www.redbubble.com" {
+    remove_query_param(&mut parsed_url, "ref");
+    remove_query_param(&mut parsed_url, "asc");
+  }
+
   // Always remove the _ga Google Analytics tracking parameter.
   remove_query_param(&mut parsed_url, "_ga");
 
@@ -550,5 +556,20 @@ tidy_url_tests! {
   blogspot_mobile_link: (
     "https://example.blogspot.com/2020/01/01/my_first_post.html?m=1",
     "https://example.blogspot.com/2020/01/01/my_first_post.html"
+  ),
+
+  redbubble_plain: (
+    "https://www.redbubble.com/people/m1sfire/works/42386806-pixel-pride-genderfluid",
+    "https://www.redbubble.com/people/m1sfire/works/42386806-pixel-pride-genderfluid"
+  ),
+
+  redbubble_referrer: (
+    "https://www.redbubble.com/people/m1sfire/works/42386806-pixel-pride-genderfluid?ref=recent-owner",
+    "https://www.redbubble.com/people/m1sfire/works/42386806-pixel-pride-genderfluid"
+  ),
+
+  redbubble_asc: (
+    "https://www.redbubble.com/people/m1sfire/works/42386806-pixel-pride-genderfluid?asc=u",
+    "https://www.redbubble.com/people/m1sfire/works/42386806-pixel-pride-genderfluid"
   ),
 }

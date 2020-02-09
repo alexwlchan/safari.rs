@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.8 (2020-02-09)
+
+*   URL tweak: strip the `ref=` and `sort=` parameters from Redbubble URLs.
+
 ## v2.2.7 (2020-01-12)
 
 *   URL tweak: strip the `m=` parameter from Blogspot URLs (so links are never mobile links).
