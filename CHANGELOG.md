@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.0 (2020-07-26)
+
+*   Add a new command `title` to get the title of a Safari window.
+
 ## v2.2.9 (2020-07-26)
 
 *   Internal refactoring to remove special-case handling for the old Wellcome Images site (`wellcomeimages.org`).

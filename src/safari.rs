@@ -47,6 +47,22 @@ pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> 
 }
 
 
+
+/// Return a title from a Safari window.
+///
+/// Given a (window, tab) pair, this function looks up the URL of the tab.
+/// Note that it doesn't do any error handling, so will throw an execution
+/// error if it fails.
+///
+/// * `window` - Window index.  1 is frontmost.  If None, assumes the
+///              frontmost window.
+/// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
+///
+pub fn get_title(window: Option<u32>, tab: Option<u32>) -> Result<String, String> {
+  get_property(window, tab, "name")
+}
+
+
 /// Look up a property on a Safari window.
 ///
 /// Given a (window, tab) pair, this function looks up the property of that tab.
@@ -56,13 +72,9 @@ pub fn get_url(window: Option<u32>, tab: Option<u32>) -> Result<String, String> 
 /// * `window` - Window index.  1 is frontmost.  If None, assumes the
 ///              frontmost window.
 /// * `tab` - Tab index.  1 is leftmost.  If None, assumes the frontmost tab.
-/// * `property` - Name of the property, as defined in the OSA scripting
-///       dictionary.  One of `URL`, `source` or `text`.
+/// * `property` - Name of the property, as defined in the OSA scripting dictionary.
 ///
 fn get_property(window: Option<u32>, tab: Option<u32>, property: &str) -> Result<String, String> {
-  if (property != "URL") && (property != "source") && (property != "text") {
-    error!("Unrecognised property: {:?}", property)
-  }
   // If a tab isn't specified, assume the user wants the frontmost tab.
   let command = match window {
     Some(w_idx) => {

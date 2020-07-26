@@ -57,6 +57,14 @@ fn main() {
     };
   }
 
+  if args.cmd_title {
+    assert_safari_is_running();
+    match safari::get_title(args.flag_window, args.flag_tab) {
+      Ok(url) => print!("{}", url),
+      Err(e)  => error!("{}", e),
+    };
+  }
+
   if args.cmd_resolve {
     print!("{}", urls::resolve(&args.arg_url));
   }
