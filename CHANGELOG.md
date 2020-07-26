@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.9 (2020-07-26)
+
+*   Internal refactoring to remove special-case handling for the old Wellcome Images site (`wellcomeimages.org`).
+    Since that site was shut down over two years ago, the code to handle it can be removed without a user-facing effect.
+
 ## v2.2.8 (2020-02-09)
 
 *   URL tweak: strip the `ref=` and `sort=` parameters from Redbubble URLs.
