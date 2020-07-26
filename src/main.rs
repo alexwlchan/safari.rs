@@ -3,7 +3,6 @@
 extern crate dirs;
 extern crate docopt;
 extern crate plist;
-extern crate regex;
 extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;

@@ -1,13 +1,12 @@
 [package]
 name = "safari"
-version = "2.2.8"
+version = "2.2.9"
 authors = ["Alex Chan <alex@alexwlchan.net>"]
 
 [dependencies]
 dirs = "2.0.2"
 docopt = "0.8"
 plist = "0.2.2"
-regex = "0.2.2"
 reqwest = "0.9.24"
 serde = "1.0.8"
 serde_derive = "1.0"
