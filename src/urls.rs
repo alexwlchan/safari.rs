@@ -65,7 +65,8 @@ pub fn tidy_url(url: &str) -> String {
 
   // Remove any tracking junk from Amazon URLs so they're not a
   // ridiculous length
-  if parsed_url.netloc == "www.amazon.co.uk" {
+  if (parsed_url.netloc == "www.amazon.co.uk") ||
+     (parsed_url.netloc == "smile.amazon.co.uk") {
     parsed_url.query = None;
     let mut new_path = String::from("");
     for component in parsed_url.path.split("ref=") {
@@ -356,6 +357,11 @@ tidy_url_tests! {
   amazon_product: (
     "https://www.amazon.co.uk/dp/B01DFKBL68/ref=gw_aucc_comb_AB_clean_2?pf_rd_r=N1MF2PWADRHS55427ETG&pf_rd_p=c11a2c11-c670-46ff-87a1-c1eef4fad652",
     "https://www.amazon.co.uk/dp/B01DFKBL68/"
+  ),
+
+  amazon_smile_product: (
+    "https://smile.amazon.co.uk/Surviving-Storms-Extraordinary-Stories-Compassion/dp/0008390126/ref=sr_1_1?dchild=1&keywords=rnli&sr=8-1&qid=1598808946",
+    "https://smile.amazon.co.uk/Surviving-Storms-Extraordinary-Stories-Compassion/dp/0008390126/"
   ),
 
   medium_with_tracking: (
