@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.1 (2020-10-02)
+
+*   URL tweak: strip the `source=` parameter from URLs on <stacks.wellcomecollection.org>.
+
 ## v2.3.0 (2020-07-26)
 
 *   Add a new command `title` to get the title of a Safari window.
