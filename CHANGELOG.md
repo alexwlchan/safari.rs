@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.2 (2020-11-21)
+
+*   URL tweak: strip a tracking parameter from URLs on <wordery.com>.
+
 ## v2.3.1 (2020-10-02)
 
 *   URL tweak: strip the `source=` parameter from URLs on <stacks.wellcomecollection.org>.
