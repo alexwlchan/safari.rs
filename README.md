@@ -89,6 +89,7 @@ version in Rust.
 Why Rust?
 
 *   It's really fast.  The Rust script returns immediately – when I tried writing this with Python, I had a noticeable delay when typing `;furl`.
+    This is a tool I use dozens of times a week, so every second counts.
 *   I like Rust, and I’ve been enjoying playing with it recently.
 
 [dr]: http://www.leancrew.com/all-this/2009/07/safari-tab-urls-via-textexpander/
