@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.3 (2021-02-05)
+
+*   URL tweak: strip the share parameter from URLs on <twitter.com>.
+
 ## v2.3.2 (2020-11-21)
 
 *   URL tweak: strip a tracking parameter from URLs on <wordery.com>.
