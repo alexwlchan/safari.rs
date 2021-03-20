@@ -144,6 +144,7 @@ pub fn tidy_url(url: &str) -> String {
   if parsed_url.netloc == "www.etsy.com" {
     remove_query_param(&mut parsed_url, "awc");
     remove_query_param(&mut parsed_url, "source");
+    remove_query_param(&mut parsed_url, "pro");
 
     parsed_url.query = match parsed_url.query {
       Some(qs) => {
@@ -562,6 +563,11 @@ tidy_url_tests! {
   etsy_section_link: (
     "https://www.etsy.com/uk/shop/Vitraaze?source=aw&section_id=17807678&awc=6091_1577546787_d9f1b918042bbd02fe406d61dae715e7",
     "https://www.etsy.com/uk/shop/Vitraaze?section_id=17807678"
+  ),
+
+  etsy_pro_link: (
+    "https://www.etsy.com/uk/listing/704478659/gothic-cathedral-window-ornate-cross?pro=1",
+    "https://www.etsy.com/uk/listing/704478659/gothic-cathedral-window-ornate-cross"
   ),
 
   blogspot: (

@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.4 (2021-02-05)
+
+*   URL tweak: strip the `pro` parameter from URLs on Etsy>.
+
 ## v2.3.3 (2021-02-05)
 
 *   URL tweak: strip the share parameter from URLs on <twitter.com>.
