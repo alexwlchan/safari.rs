@@ -1,8 +1,12 @@
 # Changelog
 
+## v2.3.5 (2021-08-08)
+
+*   URL tweak: remove Cloudflare query parameters that start `__cf`.
+
 ## v2.3.4 (2021-02-05)
 
-*   URL tweak: strip the `pro` parameter from URLs on Etsy>.
+*   URL tweak: strip the `pro` parameter from URLs on Etsy.
 
 ## v2.3.3 (2021-02-05)
 

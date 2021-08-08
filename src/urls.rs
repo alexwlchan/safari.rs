@@ -96,13 +96,13 @@ pub fn tidy_url(url: &str) -> String {
     remove_query_param(&mut parsed_url, "app");
   }
 
-  // Remove any UTM tracking parameters from URLs
+  // Remove any UTM tracking parameters and Cloudflare parameters from all URLs
   parsed_url.query = match parsed_url.query {
     Some(qs) => {
       let mut query = parse_qs(&qs);
       let utm_keys: Vec<_> = query
         .keys()
-        .filter(|key| key.starts_with("utm_"))
+        .filter(|key| key.starts_with("utm_") || key.starts_with("__cf"))
         .map(|k| k.clone())
         .collect();
       for key in utm_keys {
@@ -608,5 +608,10 @@ tidy_url_tests! {
   twitter_with_share_link: (
     "https://twitter.com/ScotRail/status/1355928580895731713?s=20",
     "https://twitter.com/ScotRail/status/1355928580895731713"
+  ),
+
+  url_with_cloudflare_query_param: (
+    "https://example.org/page?__cf_chl_jschl_tk__=1",
+    "https://example.org/page"
   ),
 }
