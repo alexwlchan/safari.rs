@@ -1234,7 +1234,7 @@ dependencies = [
 
 [[package]]
 name = "safari"
-version = "2.3.5"
+version = "2.3.6"
 dependencies = [
  "dirs",
  "docopt",

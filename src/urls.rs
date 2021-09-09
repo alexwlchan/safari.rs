@@ -82,6 +82,11 @@ pub fn tidy_url(url: &str) -> String {
     parsed_url.fragment = None;
   }
 
+  // Strip tracking junk from TikTok URLs
+  if parsed_url.netloc == "www.tiktok.com" {
+    parsed_url.query = None;
+  }
+
   // Remove '#notes' from Tumblr URLs
   if parsed_url.netloc.ends_with("tumblr.com") {
     parsed_url.fragment = match parsed_url.fragment {
@@ -613,5 +618,10 @@ tidy_url_tests! {
   url_with_cloudflare_query_param: (
     "https://example.org/page?__cf_chl_jschl_tk__=1",
     "https://example.org/page"
+  ),
+
+  tiktok_with_tracking_junk: (
+  "https://www.tiktok.com/@example/video/1234567890?sec_user_id=ABCDEFGHIJ&u_code=dgfffl6mjl6be3&share_app_id=1233&timestamp=1631110682",
+    "https://www.tiktok.com/@example/video/1234567890"
   ),
 }

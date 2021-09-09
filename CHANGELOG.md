@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.6 (2021-09-08)
+
+*   URL tweak: remove all tracking parameters from Tiktok URLs.
+
 ## v2.3.5 (2021-08-08)
 
 *   URL tweak: remove Cloudflare query parameters that start `__cf`.
