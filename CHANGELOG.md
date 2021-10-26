@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.7 (2021-10-26)
+
+*   URL tweak: remove the same tracking parameters from Amazon Smile URLs as regular Amazon URLs.
+
 ## v2.3.6 (2021-09-08)
 
 *   URL tweak: remove all tracking parameters from Tiktok URLs.
