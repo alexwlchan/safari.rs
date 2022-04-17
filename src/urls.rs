@@ -149,6 +149,7 @@ pub fn tidy_url(url: &str) -> String {
   // Remove Google Analytics parameters from Etsy URLs.
   if parsed_url.netloc == "www.etsy.com" {
     remove_query_param(&mut parsed_url, "awc");
+    remove_query_param(&mut parsed_url, "frs");
     remove_query_param(&mut parsed_url, "source");
     remove_query_param(&mut parsed_url, "pro");
 
@@ -579,6 +580,11 @@ tidy_url_tests! {
   etsy_pro_link: (
     "https://www.etsy.com/uk/listing/704478659/gothic-cathedral-window-ornate-cross?pro=1",
     "https://www.etsy.com/uk/listing/704478659/gothic-cathedral-window-ornate-cross"
+  ),
+
+  etsy_link_with_tracking: (
+    "https://www.etsy.com/uk/listing/731582894/personalised-song-lyric-or-poetry?frs=1",
+    "https://www.etsy.com/uk/listing/731582894/personalised-song-lyric-or-poetry",
   ),
 
   blogspot: (

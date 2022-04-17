@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.8 (2022-04-17)
+
+*   URL tweaking: remove the `frs` parameter from URLs on Etsy.
+
 ## v2.3.7 (2021-10-26)
 
 *   URL tweak: remove the same tracking parameters from Amazon Smile URLs as regular Amazon URLs.
