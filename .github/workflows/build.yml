@@ -1,0 +1,23 @@
+on: [push, pull_request]
+name: build
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - name: test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+      - name: check formatting
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check
