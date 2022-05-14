@@ -1,286 +1,299 @@
 use reqwest::Client;
 
-use urlencoding::{encode as urlencode};
-use urlparse::{Query, parse_qs, urlparse, urlunparse, Url};
-
+use urlencoding::encode as urlencode;
+use urlparse::{parse_qs, urlparse, urlunparse, Query, Url};
 
 /// Follow redirects to resolve the final location of a URL
 pub fn resolve(url: &str) -> String {
-  let client = Client::new();
-  client.head(url)
-        .send()
-        .unwrap()
-        .url()
-        .as_str()
-        .to_owned()
+    let client = Client::new();
+    client.head(url).send().unwrap().url().as_str().to_owned()
 }
-
 
 fn partial_urlencode(value: &str) -> String {
-  // The urlencode from the urlencoding library goes further than I like,
-  // and also URL encodes ASCII digits. Reverse that stuff.
-  urlencode(value)
-    .replace("%30", "0")
-    .replace("%31", "1")
-    .replace("%32", "2")
-    .replace("%33", "3")
-    .replace("%34", "4")
-    .replace("%35", "5")
-    .replace("%36", "6")
-    .replace("%37", "7")
-    .replace("%38", "8")
-    .replace("%39", "9")
+    // The urlencode from the urlencoding library goes further than I like,
+    // and also URL encodes ASCII digits. Reverse that stuff.
+    urlencode(value)
+        .replace("%30", "0")
+        .replace("%31", "1")
+        .replace("%32", "2")
+        .replace("%33", "3")
+        .replace("%34", "4")
+        .replace("%35", "5")
+        .replace("%36", "6")
+        .replace("%37", "7")
+        .replace("%38", "8")
+        .replace("%39", "9")
 }
-
 
 /// Re-encode a query string for Rust
 fn encode_querystring(query: Query) -> Option<String> {
-  let mut query_components: Vec<String> = vec![];
-  for (key, value) in query {
-    for v in value.iter() {
-      query_components.push(format!("{}={}", key, partial_urlencode(v)));
+    let mut query_components: Vec<String> = vec![];
+    for (key, value) in query {
+        for v in value.iter() {
+            query_components.push(format!("{}={}", key, partial_urlencode(v)));
+        }
     }
-  }
-  if query_components.len() > 0 {
-    Some(query_components.join("&"))
-  } else {
-    None
-  }
+    if query_components.len() > 0 {
+        Some(query_components.join("&"))
+    } else {
+        None
+    }
 }
-
 
 /// Strip tracking junk and URL suffixes.
 pub fn tidy_url(url: &str) -> String {
-  let mut parsed_url = urlparse(url);
+    let mut parsed_url = urlparse(url);
 
-  // Always get the desktop version of Twitter URLs
-  if parsed_url.netloc == "mobile.twitter.com" {
-    parsed_url.netloc = String::from("twitter.com");
-  }
-
-  // Always get the non-mobile version of nytimes.com URLs
-  if parsed_url.netloc == "mobile.nytimes.com" {
-    parsed_url.netloc = String::from("nytimes.com");
-  }
-
-  // Remove any tracking junk from Amazon URLs so they're not a
-  // ridiculous length
-  if (parsed_url.netloc == "www.amazon.co.uk") ||
-     (parsed_url.netloc == "smile.amazon.co.uk"){
-    parsed_url.query = None;
-    let mut new_path = String::from("");
-    for component in parsed_url.path.split("ref=") {
-      new_path = String::from(component);
-      break;
+    // Always get the desktop version of Twitter URLs
+    if parsed_url.netloc == "mobile.twitter.com" {
+        parsed_url.netloc = String::from("twitter.com");
     }
-    parsed_url.path = new_path;
-  }
 
-  // Strip tracking junk from Medium, Mashable and Buzzfeed
-  if (parsed_url.netloc == "medium.com") ||
-     (parsed_url.netloc == "www.buzzfeed.com") ||
-     (parsed_url.netloc == "mashable.com") {
-    parsed_url.fragment = None;
-  }
-
-  // Strip tracking junk from TikTok URLs
-  if parsed_url.netloc == "www.tiktok.com" {
-    parsed_url.query = None;
-  }
-
-  // Remove '#notes' from Tumblr URLs
-  if parsed_url.netloc.ends_with("tumblr.com") {
-    parsed_url.fragment = match parsed_url.fragment {
-      Some(fragment) => if fragment == "notes" { None } else { Some(fragment) },
-      None => None,
-    };
-  }
-
-  // Remove &feature=youtu.be from YouTube URLs
-  if parsed_url.netloc.ends_with("youtube.com") {
-    remove_query_param(&mut parsed_url, "feature");
-    remove_query_param(&mut parsed_url, "app");
-  }
-
-  // Remove any UTM tracking parameters and Cloudflare parameters from all URLs
-  parsed_url.query = match parsed_url.query {
-    Some(qs) => {
-      let mut query = parse_qs(&qs);
-      let utm_keys: Vec<_> = query
-        .keys()
-        .filter(|key| key.starts_with("utm_") || key.starts_with("__cf"))
-        .map(|k| k.clone())
-        .collect();
-      for key in utm_keys {
-        query.remove(&key);
-      }
-      encode_querystring(query)
-    },
-    None => None
-  };
-
-  // Tidy up the query and anchor links in modules on docs.python.org
-  if parsed_url.netloc == "docs.python.org" {
-
-    // If this is a module page, scrap any module- fragment.
-    parsed_url.fragment = match parsed_url.fragment {
-      Some(fragment) => if fragment.starts_with("module-") { None } else { Some(fragment) },
-      None => None,
-    };
-
-    // Scrap the highlight
-    remove_query_param(&mut parsed_url, "highlight");
-  }
-
-  // If I'm on a GitHub pull request and looking at the files tab,
-  // link to the top of the pull request.
-  if parsed_url.netloc == "github.com" {
-    if parsed_url.path.ends_with("/files") {
-      parsed_url.path = parsed_url.path.replace("/files", "");
+    // Always get the non-mobile version of nytimes.com URLs
+    if parsed_url.netloc == "mobile.nytimes.com" {
+        parsed_url.netloc = String::from("nytimes.com");
     }
-  }
 
-  // Remove tracking query parameters from telegraph.co.uk URLs
-  // https://github.com/alexwlchan/safari.rs/issues/48
-  if parsed_url.netloc == "www.telegraph.co.uk" {
-    remove_query_param(&mut parsed_url, "WT.mc_id");
-  }
-
-  // Remove Google Analytics parameters from Etsy URLs.
-  if parsed_url.netloc == "www.etsy.com" {
-    remove_query_param(&mut parsed_url, "awc");
-    remove_query_param(&mut parsed_url, "frs");
-    remove_query_param(&mut parsed_url, "source");
-    remove_query_param(&mut parsed_url, "pro");
-
-    parsed_url.query = match parsed_url.query {
-      Some(qs) => {
-        let mut query = parse_qs(&qs);
-        let utm_keys: Vec<_> = query
-          .keys()
-          .filter(|key|
-            key.starts_with("ga_") ||
-            key.starts_with("ref") ||
-            key.starts_with("organic_search_click")
-          )
-          .map(|k| k.clone())
-          .collect();
-        for key in utm_keys {
-          query.remove(&key);
+    // Remove any tracking junk from Amazon URLs so they're not a
+    // ridiculous length
+    if (parsed_url.netloc == "www.amazon.co.uk") || (parsed_url.netloc == "smile.amazon.co.uk") {
+        parsed_url.query = None;
+        let mut new_path = String::from("");
+        for component in parsed_url.path.split("ref=") {
+            new_path = String::from(component);
+            break;
         }
-        encode_querystring(query)
-      },
-      None => None
+        parsed_url.path = new_path;
+    }
+
+    // Strip tracking junk from Medium, Mashable and Buzzfeed
+    if (parsed_url.netloc == "medium.com")
+        || (parsed_url.netloc == "www.buzzfeed.com")
+        || (parsed_url.netloc == "mashable.com")
+    {
+        parsed_url.fragment = None;
+    }
+
+    // Strip tracking junk from TikTok URLs
+    if parsed_url.netloc == "www.tiktok.com" {
+        parsed_url.query = None;
+    }
+
+    // Remove '#notes' from Tumblr URLs
+    if parsed_url.netloc.ends_with("tumblr.com") {
+        parsed_url.fragment = match parsed_url.fragment {
+            Some(fragment) => {
+                if fragment == "notes" {
+                    None
+                } else {
+                    Some(fragment)
+                }
+            }
+            None => None,
+        };
+    }
+
+    // Remove &feature=youtu.be from YouTube URLs
+    if parsed_url.netloc.ends_with("youtube.com") {
+        remove_query_param(&mut parsed_url, "feature");
+        remove_query_param(&mut parsed_url, "app");
+    }
+
+    // Remove any UTM tracking parameters and Cloudflare parameters from all URLs
+    parsed_url.query = match parsed_url.query {
+        Some(qs) => {
+            let mut query = parse_qs(&qs);
+            let utm_keys: Vec<_> = query
+                .keys()
+                .filter(|key| key.starts_with("utm_") || key.starts_with("__cf"))
+                .map(|k| k.clone())
+                .collect();
+            for key in utm_keys {
+                query.remove(&key);
+            }
+            encode_querystring(query)
+        }
+        None => None,
     };
-  }
 
-  // Un-mobile-ify blogspot links.
-  if parsed_url.netloc.ends_with("blogspot.com") {
-    remove_query_param(&mut parsed_url, "m");
-  }
+    // Tidy up the query and anchor links in modules on docs.python.org
+    if parsed_url.netloc == "docs.python.org" {
+        // If this is a module page, scrap any module- fragment.
+        parsed_url.fragment = match parsed_url.fragment {
+            Some(fragment) => {
+                if fragment.starts_with("module-") {
+                    None
+                } else {
+                    Some(fragment)
+                }
+            }
+            None => None,
+        };
 
-  // Un-mobile-ify blogspot links.
-  if parsed_url.netloc == "www.redbubble.com" {
-    remove_query_param(&mut parsed_url, "ref");
-    remove_query_param(&mut parsed_url, "asc");
-  }
+        // Scrap the highlight
+        remove_query_param(&mut parsed_url, "highlight");
+    }
 
-  // Always remove the _ga Google Analytics tracking parameter.
-  remove_query_param(&mut parsed_url, "_ga");
+    // If I'm on a GitHub pull request and looking at the files tab,
+    // link to the top of the pull request.
+    if parsed_url.netloc == "github.com" {
+        if parsed_url.path.ends_with("/files") {
+            parsed_url.path = parsed_url.path.replace("/files", "");
+        }
+    }
 
-  // Remove tracking parameters from stacks.wellcomecollection.org URLs,
-  // which are from Medium.
-  if parsed_url.netloc == "stacks.wellcomecollection.org" {
-    remove_query_param(&mut parsed_url, "source");
-  }
+    // Remove tracking query parameters from telegraph.co.uk URLs
+    // https://github.com/alexwlchan/safari.rs/issues/48
+    if parsed_url.netloc == "www.telegraph.co.uk" {
+        remove_query_param(&mut parsed_url, "WT.mc_id");
+    }
 
-  // Remove tracking parameters from Wordery URLs.
-  if parsed_url.netloc == "wordery.com" {
-    remove_query_param(&mut parsed_url, "cTrk");
-  }
+    // Remove Google Analytics parameters from Etsy URLs.
+    if parsed_url.netloc == "www.etsy.com" {
+        remove_query_param(&mut parsed_url, "awc");
+        remove_query_param(&mut parsed_url, "frs");
+        remove_query_param(&mut parsed_url, "source");
+        remove_query_param(&mut parsed_url, "pro");
 
-  // Remove the share parameter from Twitter URLs.
-  if parsed_url.netloc == "twitter.com" {
-    remove_query_param(&mut parsed_url, "s");
-  }
+        parsed_url.query = match parsed_url.query {
+            Some(qs) => {
+                let mut query = parse_qs(&qs);
+                let utm_keys: Vec<_> = query
+                    .keys()
+                    .filter(|key| {
+                        key.starts_with("ga_")
+                            || key.starts_with("ref")
+                            || key.starts_with("organic_search_click")
+                    })
+                    .map(|k| k.clone())
+                    .collect();
+                for key in utm_keys {
+                    query.remove(&key);
+                }
+                encode_querystring(query)
+            }
+            None => None,
+        };
+    }
 
-  // Convert links to questions on Stack Overflow to insert my sharing
-  // link for the Announcer badge.
-  // This code is autogenerated by the `se_referral_autogen.py` script.
-  fix_se_referral(&mut parsed_url, "academia.stackexchange.com", "7658");
-  fix_se_referral(&mut parsed_url, "anime.stackexchange.com", "7674");
-  fix_se_referral(&mut parsed_url, "apple.stackexchange.com", "14295");
-  fix_se_referral(&mut parsed_url, "area51.stackexchange.com", "47881");
-  fix_se_referral(&mut parsed_url, "askubuntu.com", "265738");
-  fix_se_referral(&mut parsed_url, "aviation.stackexchange.com", "1372");
-  fix_se_referral(&mut parsed_url, "bicycles.stackexchange.com", "17362");
-  fix_se_referral(&mut parsed_url, "biology.stackexchange.com", "16115");
-  fix_se_referral(&mut parsed_url, "bricks.stackexchange.com", "445");
-  fix_se_referral(&mut parsed_url, "chemistry.stackexchange.com", "5443");
-  fix_se_referral(&mut parsed_url, "chess.stackexchange.com", "2564");
-  fix_se_referral(&mut parsed_url, "christianity.stackexchange.com", "10196");
-  fix_se_referral(&mut parsed_url, "codegolf.stackexchange.com", "13285");
-  fix_se_referral(&mut parsed_url, "codereview.stackexchange.com", "36525");
-  fix_se_referral(&mut parsed_url, "cogsci.stackexchange.com", "7973");
-  fix_se_referral(&mut parsed_url, "communitybuilding.stackexchange.com", "372");
-  fix_se_referral(&mut parsed_url, "cooking.stackexchange.com", "25134");
-  fix_se_referral(&mut parsed_url, "crypto.stackexchange.com", "1185");
-  fix_se_referral(&mut parsed_url, "diy.stackexchange.com", "25263");
-  fix_se_referral(&mut parsed_url, "dsp.stackexchange.com", "8360");
-  fix_se_referral(&mut parsed_url, "earthscience.stackexchange.com", "352");
-  fix_se_referral(&mut parsed_url, "elementaryos.stackexchange.com", "3586");
-  fix_se_referral(&mut parsed_url, "english.stackexchange.com", "22597");
-  fix_se_referral(&mut parsed_url, "gaming.stackexchange.com", "73524");
-  fix_se_referral(&mut parsed_url, "gardening.stackexchange.com", "813");
-  fix_se_referral(&mut parsed_url, "gis.stackexchange.com", "26054");
-  fix_se_referral(&mut parsed_url, "graphicdesign.stackexchange.com", "19347");
-  fix_se_referral(&mut parsed_url, "law.stackexchange.com", "2488");
-  fix_se_referral(&mut parsed_url, "lifehacks.stackexchange.com", "11245");
-  fix_se_referral(&mut parsed_url, "linguistics.stackexchange.com", "2722");
-  fix_se_referral(&mut parsed_url, "math.stackexchange.com", "24160");
-  fix_se_referral(&mut parsed_url, "matheducators.stackexchange.com", "661");
-  fix_se_referral(&mut parsed_url, "mathematica.stackexchange.com", "5190");
-  fix_se_referral(&mut parsed_url, "mathoverflow.net", "38734");
-  fix_se_referral(&mut parsed_url, "mechanics.stackexchange.com", "14629");
-  fix_se_referral(&mut parsed_url, "meta.stackexchange.com", "226928");
-  fix_se_referral(&mut parsed_url, "money.stackexchange.com", "13518");
-  fix_se_referral(&mut parsed_url, "movies.stackexchange.com", "9285");
-  fix_se_referral(&mut parsed_url, "networkengineering.stackexchange.com", "16668");
-  fix_se_referral(&mut parsed_url, "opensource.stackexchange.com", "2909");
-  fix_se_referral(&mut parsed_url, "parenting.stackexchange.com", "14304");
-  fix_se_referral(&mut parsed_url, "patents.stackexchange.com", "3882");
-  fix_se_referral(&mut parsed_url, "philosophy.stackexchange.com", "16838");
-  fix_se_referral(&mut parsed_url, "photo.stackexchange.com", "29700");
-  fix_se_referral(&mut parsed_url, "physics.stackexchange.com", "38614");
-  fix_se_referral(&mut parsed_url, "politics.stackexchange.com", "5590");
-  fix_se_referral(&mut parsed_url, "productivity.stackexchange.com", "1990");
-  fix_se_referral(&mut parsed_url, "puzzling.stackexchange.com", "4692");
-  fix_se_referral(&mut parsed_url, "rpg.stackexchange.com", "22823");
-  fix_se_referral(&mut parsed_url, "salesforce.stackexchange.com", "36215");
-  fix_se_referral(&mut parsed_url, "scifi.stackexchange.com", "3567");
-  fix_se_referral(&mut parsed_url, "security.stackexchange.com", "9814");
-  fix_se_referral(&mut parsed_url, "serverfault.com", "206273");
-  fix_se_referral(&mut parsed_url, "skeptics.stackexchange.com", "5416");
-  fix_se_referral(&mut parsed_url, "softwareengineering.stackexchange.com", "94977");
-  fix_se_referral(&mut parsed_url, "space.stackexchange.com", "1003");
-  fix_se_referral(&mut parsed_url, "sqa.stackexchange.com", "7301");
-  fix_se_referral(&mut parsed_url, "stackapps.com", "21515");
-  fix_se_referral(&mut parsed_url, "stackoverflow.com", "1558022");
-  fix_se_referral(&mut parsed_url, "stats.stackexchange.com", "32450");
-  fix_se_referral(&mut parsed_url, "superuser.com", "243137");
-  fix_se_referral(&mut parsed_url, "tex.stackexchange.com", "9668");
-  fix_se_referral(&mut parsed_url, "travel.stackexchange.com", "12415");
-  fix_se_referral(&mut parsed_url, "unix.stackexchange.com", "43183");
-  fix_se_referral(&mut parsed_url, "ux.stackexchange.com", "9976");
-  fix_se_referral(&mut parsed_url, "webapps.stackexchange.com", "45296");
-  fix_se_referral(&mut parsed_url, "webmasters.stackexchange.com", "35749");
-  fix_se_referral(&mut parsed_url, "workplace.stackexchange.com", "14106");
-  fix_se_referral(&mut parsed_url, "worldbuilding.stackexchange.com", "2575");
-  fix_se_referral(&mut parsed_url, "writers.stackexchange.com", "11018");
+    // Un-mobile-ify blogspot links.
+    if parsed_url.netloc.ends_with("blogspot.com") {
+        remove_query_param(&mut parsed_url, "m");
+    }
 
-  urlunparse(parsed_url)
+    // Un-mobile-ify blogspot links.
+    if parsed_url.netloc == "www.redbubble.com" {
+        remove_query_param(&mut parsed_url, "ref");
+        remove_query_param(&mut parsed_url, "asc");
+    }
+
+    // Always remove the _ga Google Analytics tracking parameter.
+    remove_query_param(&mut parsed_url, "_ga");
+
+    // Remove tracking parameters from stacks.wellcomecollection.org URLs,
+    // which are from Medium.
+    if parsed_url.netloc == "stacks.wellcomecollection.org" {
+        remove_query_param(&mut parsed_url, "source");
+    }
+
+    // Remove tracking parameters from Wordery URLs.
+    if parsed_url.netloc == "wordery.com" {
+        remove_query_param(&mut parsed_url, "cTrk");
+    }
+
+    // Remove the share parameter from Twitter URLs.
+    if parsed_url.netloc == "twitter.com" {
+        remove_query_param(&mut parsed_url, "s");
+    }
+
+    // Convert links to questions on Stack Overflow to insert my sharing
+    // link for the Announcer badge.
+    // This code is autogenerated by the `se_referral_autogen.py` script.
+    fix_se_referral(&mut parsed_url, "academia.stackexchange.com", "7658");
+    fix_se_referral(&mut parsed_url, "anime.stackexchange.com", "7674");
+    fix_se_referral(&mut parsed_url, "apple.stackexchange.com", "14295");
+    fix_se_referral(&mut parsed_url, "area51.stackexchange.com", "47881");
+    fix_se_referral(&mut parsed_url, "askubuntu.com", "265738");
+    fix_se_referral(&mut parsed_url, "aviation.stackexchange.com", "1372");
+    fix_se_referral(&mut parsed_url, "bicycles.stackexchange.com", "17362");
+    fix_se_referral(&mut parsed_url, "biology.stackexchange.com", "16115");
+    fix_se_referral(&mut parsed_url, "bricks.stackexchange.com", "445");
+    fix_se_referral(&mut parsed_url, "chemistry.stackexchange.com", "5443");
+    fix_se_referral(&mut parsed_url, "chess.stackexchange.com", "2564");
+    fix_se_referral(&mut parsed_url, "christianity.stackexchange.com", "10196");
+    fix_se_referral(&mut parsed_url, "codegolf.stackexchange.com", "13285");
+    fix_se_referral(&mut parsed_url, "codereview.stackexchange.com", "36525");
+    fix_se_referral(&mut parsed_url, "cogsci.stackexchange.com", "7973");
+    fix_se_referral(
+        &mut parsed_url,
+        "communitybuilding.stackexchange.com",
+        "372",
+    );
+    fix_se_referral(&mut parsed_url, "cooking.stackexchange.com", "25134");
+    fix_se_referral(&mut parsed_url, "crypto.stackexchange.com", "1185");
+    fix_se_referral(&mut parsed_url, "diy.stackexchange.com", "25263");
+    fix_se_referral(&mut parsed_url, "dsp.stackexchange.com", "8360");
+    fix_se_referral(&mut parsed_url, "earthscience.stackexchange.com", "352");
+    fix_se_referral(&mut parsed_url, "elementaryos.stackexchange.com", "3586");
+    fix_se_referral(&mut parsed_url, "english.stackexchange.com", "22597");
+    fix_se_referral(&mut parsed_url, "gaming.stackexchange.com", "73524");
+    fix_se_referral(&mut parsed_url, "gardening.stackexchange.com", "813");
+    fix_se_referral(&mut parsed_url, "gis.stackexchange.com", "26054");
+    fix_se_referral(&mut parsed_url, "graphicdesign.stackexchange.com", "19347");
+    fix_se_referral(&mut parsed_url, "law.stackexchange.com", "2488");
+    fix_se_referral(&mut parsed_url, "lifehacks.stackexchange.com", "11245");
+    fix_se_referral(&mut parsed_url, "linguistics.stackexchange.com", "2722");
+    fix_se_referral(&mut parsed_url, "math.stackexchange.com", "24160");
+    fix_se_referral(&mut parsed_url, "matheducators.stackexchange.com", "661");
+    fix_se_referral(&mut parsed_url, "mathematica.stackexchange.com", "5190");
+    fix_se_referral(&mut parsed_url, "mathoverflow.net", "38734");
+    fix_se_referral(&mut parsed_url, "mechanics.stackexchange.com", "14629");
+    fix_se_referral(&mut parsed_url, "meta.stackexchange.com", "226928");
+    fix_se_referral(&mut parsed_url, "money.stackexchange.com", "13518");
+    fix_se_referral(&mut parsed_url, "movies.stackexchange.com", "9285");
+    fix_se_referral(
+        &mut parsed_url,
+        "networkengineering.stackexchange.com",
+        "16668",
+    );
+    fix_se_referral(&mut parsed_url, "opensource.stackexchange.com", "2909");
+    fix_se_referral(&mut parsed_url, "parenting.stackexchange.com", "14304");
+    fix_se_referral(&mut parsed_url, "patents.stackexchange.com", "3882");
+    fix_se_referral(&mut parsed_url, "philosophy.stackexchange.com", "16838");
+    fix_se_referral(&mut parsed_url, "photo.stackexchange.com", "29700");
+    fix_se_referral(&mut parsed_url, "physics.stackexchange.com", "38614");
+    fix_se_referral(&mut parsed_url, "politics.stackexchange.com", "5590");
+    fix_se_referral(&mut parsed_url, "productivity.stackexchange.com", "1990");
+    fix_se_referral(&mut parsed_url, "puzzling.stackexchange.com", "4692");
+    fix_se_referral(&mut parsed_url, "rpg.stackexchange.com", "22823");
+    fix_se_referral(&mut parsed_url, "salesforce.stackexchange.com", "36215");
+    fix_se_referral(&mut parsed_url, "scifi.stackexchange.com", "3567");
+    fix_se_referral(&mut parsed_url, "security.stackexchange.com", "9814");
+    fix_se_referral(&mut parsed_url, "serverfault.com", "206273");
+    fix_se_referral(&mut parsed_url, "skeptics.stackexchange.com", "5416");
+    fix_se_referral(
+        &mut parsed_url,
+        "softwareengineering.stackexchange.com",
+        "94977",
+    );
+    fix_se_referral(&mut parsed_url, "space.stackexchange.com", "1003");
+    fix_se_referral(&mut parsed_url, "sqa.stackexchange.com", "7301");
+    fix_se_referral(&mut parsed_url, "stackapps.com", "21515");
+    fix_se_referral(&mut parsed_url, "stackoverflow.com", "1558022");
+    fix_se_referral(&mut parsed_url, "stats.stackexchange.com", "32450");
+    fix_se_referral(&mut parsed_url, "superuser.com", "243137");
+    fix_se_referral(&mut parsed_url, "tex.stackexchange.com", "9668");
+    fix_se_referral(&mut parsed_url, "travel.stackexchange.com", "12415");
+    fix_se_referral(&mut parsed_url, "unix.stackexchange.com", "43183");
+    fix_se_referral(&mut parsed_url, "ux.stackexchange.com", "9976");
+    fix_se_referral(&mut parsed_url, "webapps.stackexchange.com", "45296");
+    fix_se_referral(&mut parsed_url, "webmasters.stackexchange.com", "35749");
+    fix_se_referral(&mut parsed_url, "workplace.stackexchange.com", "14106");
+    fix_se_referral(&mut parsed_url, "worldbuilding.stackexchange.com", "2575");
+    fix_se_referral(&mut parsed_url, "writers.stackexchange.com", "11018");
+
+    urlunparse(parsed_url)
 }
-
 
 /// Remove a query parameter from a URL.
 ///
@@ -288,16 +301,15 @@ pub fn tidy_url(url: &str) -> String {
 /// - `query_param` - name of the query parameter to remove.
 ///
 fn remove_query_param(parsed_url: &mut Url, query_param: &str) {
-  parsed_url.query = match parsed_url.query {
-    Some(ref qs) => {
-      let mut query = parse_qs(&qs);
-      query.remove(query_param);
-      encode_querystring(query)
-    },
-    None => None
-  };
+    parsed_url.query = match parsed_url.query {
+        Some(ref qs) => {
+            let mut query = parse_qs(&qs);
+            query.remove(query_param);
+            encode_querystring(query)
+        }
+        None => None,
+    };
 }
-
 
 /// Turn a URL into a Stack Exchange referral link.
 ///
@@ -306,52 +318,50 @@ fn remove_query_param(parsed_url: &mut Url, query_param: &str) {
 /// - `user_id` - your user ID on the SE site
 ///
 fn fix_se_referral(parsed_url: &mut Url, hostname: &str, user_id: &str) {
-
-  if parsed_url.netloc != hostname {
-    return;
-  }
-
-  // A question URL is of the form
-  //
-  //    http://stackoverflow.com/questions/:question_id/:question_title
-  //
-  if !parsed_url.path.starts_with("/questions") {
-    return;
-  }
-
-  // Take a copy of the original path to get around ownership rules
-  let original_path = parsed_url.path.to_owned();
-
-  let new_path = match original_path.split("/").nth(2) {
-    Some(path_component) => {
-      // Check it's a number
-      match path_component.parse::<i32>() {
-        Ok(q_id) => {
-          // Check if there's an answer fragment
-          match parsed_url.fragment.to_owned() {
-            Some(fragment) => match fragment.parse::<i32>() {
-              Ok(ans_id) => Some(format!("/a/{}/{}", ans_id, user_id)),
-              Err(_) => None,
-            },
-            None => Some(format!("/q/{}/{}", q_id, user_id)),
-          }
-        },
-        Err(_) => None,
-      }
+    if parsed_url.netloc != hostname {
+        return;
     }
-    None => None,
-  };
 
-  // If we got something interesting, update the URL.
-  match new_path {
-    Some(p) => {
-      parsed_url.path = p;
-      parsed_url.fragment = None;
-    },
-    None => (),
-  };
+    // A question URL is of the form
+    //
+    //    http://stackoverflow.com/questions/:question_id/:question_title
+    //
+    if !parsed_url.path.starts_with("/questions") {
+        return;
+    }
+
+    // Take a copy of the original path to get around ownership rules
+    let original_path = parsed_url.path.to_owned();
+
+    let new_path = match original_path.split("/").nth(2) {
+        Some(path_component) => {
+            // Check it's a number
+            match path_component.parse::<i32>() {
+                Ok(q_id) => {
+                    // Check if there's an answer fragment
+                    match parsed_url.fragment.to_owned() {
+                        Some(fragment) => match fragment.parse::<i32>() {
+                            Ok(ans_id) => Some(format!("/a/{}/{}", ans_id, user_id)),
+                            Err(_) => None,
+                        },
+                        None => Some(format!("/q/{}/{}", q_id, user_id)),
+                    }
+                }
+                Err(_) => None,
+            }
+        }
+        None => None,
+    };
+
+    // If we got something interesting, update the URL.
+    match new_path {
+        Some(p) => {
+            parsed_url.path = p;
+            parsed_url.fragment = None;
+        }
+        None => (),
+    };
 }
-
 
 macro_rules! tidy_url_tests {
   ($($name:ident: $value:expr,)*) => {
@@ -364,7 +374,6 @@ macro_rules! tidy_url_tests {
     )*
   }
 }
-
 
 tidy_url_tests! {
   twitter_mobile: (

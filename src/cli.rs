@@ -2,7 +2,6 @@ use std::io::Write;
 
 use docopt::{Docopt, Error};
 
-
 // https://stackoverflow.com/a/27590832/1558022
 macro_rules! println_stderr(
     ($($arg:tt)*) => { {
@@ -10,7 +9,6 @@ macro_rules! println_stderr(
         r.expect("failed printing to stderr");
     } }
 );
-
 
 const USAGE: &str = "
 Usage: <NAME> url [--window=<WINDOW> [--tab=<TAB>]]
@@ -50,59 +48,59 @@ Commands:
 
 #[derive(Debug, Deserialize)]
 pub struct Args {
-  pub cmd_url: bool,
-  pub cmd_title: bool,
-  pub cmd_tidy_url: bool,
-  pub cmd_resolve: bool,
-  pub cmd_urls_all: bool,
-  pub cmd_list_tabs: bool,
-  pub cmd_close_tabs: bool,
-  pub cmd_icloud_tabs: bool,
-  pub cmd_reading_list: bool,
-  pub flag_window: Option<u32>,
-  pub flag_tab: Option<u32>,
-  pub flag_version: bool,
-  pub flag_list_devices: bool,
-  pub flag_device: Option<String>,
-  pub arg_url: String,
-  pub arg_urls_to_close: String,
+    pub cmd_url: bool,
+    pub cmd_title: bool,
+    pub cmd_tidy_url: bool,
+    pub cmd_resolve: bool,
+    pub cmd_urls_all: bool,
+    pub cmd_list_tabs: bool,
+    pub cmd_close_tabs: bool,
+    pub cmd_icloud_tabs: bool,
+    pub cmd_reading_list: bool,
+    pub flag_window: Option<u32>,
+    pub flag_tab: Option<u32>,
+    pub flag_version: bool,
+    pub flag_list_devices: bool,
+    pub flag_device: Option<String>,
+    pub arg_url: String,
+    pub arg_urls_to_close: String,
 }
 
 pub fn parse_args(name: &str) -> Args {
-  let mut args: Args = Docopt::new(str::replace(USAGE, "<NAME>", name))
-                              .and_then(|d| d.deserialize())
-                              .unwrap_or_else(|e| e.exit());
+    let mut args: Args = Docopt::new(str::replace(USAGE, "<NAME>", name))
+        .and_then(|d| d.deserialize())
+        .unwrap_or_else(|e| e.exit());
 
-  // 0 is the default value for the --window and --tab flags, so if we get
-  // this value then replace it with None.
-  if args.cmd_url {
-    match args.flag_window {
-      Some(v) => {
-        if v == 0 {
-          args.flag_window = None;
+    // 0 is the default value for the --window and --tab flags, so if we get
+    // this value then replace it with None.
+    if args.cmd_url {
+        match args.flag_window {
+            Some(v) => {
+                if v == 0 {
+                    args.flag_window = None;
+                };
+            }
+            None => {}
         };
-      },
-      None => {},
-    };
-    match args.flag_tab {
-      Some(v) => {
-        if v == 0 {
-          args.flag_tab = None;
+        match args.flag_tab {
+            Some(v) => {
+                if v == 0 {
+                    args.flag_tab = None;
+                };
+            }
+            None => {}
         };
-      },
-      None => {},
-    };
 
-    if args.flag_tab.is_some() && args.flag_window.is_none() {
-      Error::Usage("Cannot use --tab without --window.".to_string()).exit();
+        if args.flag_tab.is_some() && args.flag_window.is_none() {
+            Error::Usage("Cannot use --tab without --window.".to_string()).exit();
+        }
     }
-  }
 
-  if args.cmd_urls_all {
-    println_stderr!("The --urls-all flag is deprecated; please use --list-tabs.");
-    args.cmd_urls_all = false;
-    args.cmd_list_tabs = true;
-  }
+    if args.cmd_urls_all {
+        println_stderr!("The --urls-all flag is deprecated; please use --list-tabs.");
+        args.cmd_urls_all = false;
+        args.cmd_list_tabs = true;
+    }
 
-  args
+    args
 }
