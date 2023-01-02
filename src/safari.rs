@@ -249,7 +249,7 @@ fn read_bookmarks_plist(title: &str) -> Result<Plist, String> {
     let mut matching_children = children.iter().filter(|d| match d.as_dictionary() {
         Some(dict) => match dict.get("Title") {
             Some(title_elem) => match title_elem.as_string() {
-                Some(v) => (v == title),
+                Some(v) => v == title,
                 None => false,
             },
             None => false,
