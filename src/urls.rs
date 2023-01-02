@@ -110,7 +110,9 @@ pub fn tidy_url(url: &str) -> String {
             let mut query = parse_qs(&qs);
             let ignore_keys: Vec<_> = query
                 .keys()
-                .filter(|key| key.starts_with("utm_") || key.starts_with("__cf") || key.starts_with("hsa"))
+                .filter(|key| {
+                    key.starts_with("utm_") || key.starts_with("__cf") || key.starts_with("hsa")
+                })
                 .map(|k| k.clone())
                 .collect();
             for key in ignore_keys {
