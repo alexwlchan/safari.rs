@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.10 (2023-01-02)
+
+*   URL tweak: remove HubSpot tracking parameters.
+
 ## v2.3.9 (2022-05-14)
 
 *   Start publishing binaries as GitHub Releases.

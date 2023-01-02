@@ -99,16 +99,21 @@ pub fn tidy_url(url: &str) -> String {
         remove_query_param(&mut parsed_url, "app");
     }
 
-    // Remove any UTM tracking parameters and Cloudflare parameters from all URLs
+    // Remove any tracking parameters which:
+    //
+    //    * Come from UTM (Urchin Tracking Module)
+    //    * Come from Cloudflare tracking
+    //    * Come from HubSpot
+    //
     parsed_url.query = match parsed_url.query {
         Some(qs) => {
             let mut query = parse_qs(&qs);
-            let utm_keys: Vec<_> = query
+            let ignore_keys: Vec<_> = query
                 .keys()
-                .filter(|key| key.starts_with("utm_") || key.starts_with("__cf"))
+                .filter(|key| key.starts_with("utm_") || key.starts_with("__cf") || key.starts_with("hsa"))
                 .map(|k| k.clone())
                 .collect();
-            for key in utm_keys {
+            for key in ignore_keys {
                 query.remove(&key);
             }
             encode_querystring(query)
@@ -189,6 +194,9 @@ pub fn tidy_url(url: &str) -> String {
 
     // Always remove the _ga Google Analytics tracking parameter.
     remove_query_param(&mut parsed_url, "_ga");
+
+    // Always remove the Google Click ID tracking parameters.
+    remove_query_param(&mut parsed_url, "gclid");
 
     // Remove tracking parameters from stacks.wellcomecollection.org URLs,
     // which are from Medium.
@@ -641,8 +649,18 @@ tidy_url_tests! {
     "https://example.org/page"
   ),
 
+  url_with_hubspot_query_param: (
+    "https://imgix.com/pricing?hsa_grp=131223639264&hsa_acc=8534109361&gclid=CjwKCAiA-8SdBhBGEiwAWdgtcHVTpIo3PdadyKLfI4Wv3CdUUhcRISS0QNoitcBtZeJxiCJ_ZKowvhoCg68QAvD_BwE&hsa_src=g&hsa_cam=13763501966&hsa_mt=b&hsa_net=adwords&hsa_ad=598338680789&hsa_tgt=kwd-340899810185&hsa_ver=3&hsa_kw=imgix%20pricing",
+    "https://imgix.com/pricing"
+  ),
+
+  url_with_google_click_id_query_param: (
+    "https://imgix.com/pricing?gclid=CjwKCAiA-8SdBhBGEiwAWdgtcHVTpIo3PdadyKLfI4Wv3CdUUhcRISS0QNoitcBtZeJxiCJ_ZKowvhoCg68QAvD_BwE",
+    "https://imgix.com/pricing"
+  ),
+
   tiktok_with_tracking_junk: (
-  "https://www.tiktok.com/@example/video/1234567890?sec_user_id=ABCDEFGHIJ&u_code=dgfffl6mjl6be3&share_app_id=1233&timestamp=1631110682",
+    "https://www.tiktok.com/@example/video/1234567890?sec_user_id=ABCDEFGHIJ&u_code=dgfffl6mjl6be3&share_app_id=1233&timestamp=1631110682",
     "https://www.tiktok.com/@example/video/1234567890"
   ),
 }
