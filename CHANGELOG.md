@@ -3,6 +3,7 @@
 ## v2.3.10 (2023-01-02)
 
 *   URL tweak: remove HubSpot tracking parameters.
+*   Provide binaries for Macs running Apple Silicon.
 
 ## v2.3.9 (2022-05-14)
 
