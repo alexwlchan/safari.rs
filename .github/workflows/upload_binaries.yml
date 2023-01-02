@@ -19,14 +19,18 @@ jobs:
   upload-assets:
     strategy:
       matrix:
-        os:
-          - macos-latest
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-11
+          - target: x86_64-apple-darwin
+            os: macos-10.15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: safari
-          tar: unix
+          target: ${{ matrix.target }}
+          bin: dominant_colours
+          tar: all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
