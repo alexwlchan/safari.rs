@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.11 (2023-02-07)
+
+*   URL tweak: remove more referrer parameters from Twitter URLs.
+
 ## v2.3.10 (2023-01-02)
 
 *   URL tweak: remove HubSpot tracking parameters.

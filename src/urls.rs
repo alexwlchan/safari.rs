@@ -211,9 +211,11 @@ pub fn tidy_url(url: &str) -> String {
         remove_query_param(&mut parsed_url, "cTrk");
     }
 
-    // Remove the share parameter from Twitter URLs.
+    // Remove sharing/referral parameter from Twitter URLs.
     if parsed_url.netloc == "twitter.com" {
         remove_query_param(&mut parsed_url, "s");
+        remove_query_param(&mut parsed_url, "ref_url");
+        remove_query_param(&mut parsed_url, "ref_src");
     }
 
     // Convert links to questions on Stack Overflow to insert my sharing
@@ -644,6 +646,11 @@ tidy_url_tests! {
   twitter_with_share_link: (
     "https://twitter.com/ScotRail/status/1355928580895731713?s=20",
     "https://twitter.com/ScotRail/status/1355928580895731713"
+  ),
+
+  twitter_with_ref: (
+    "https://twitter.com/thingskatedid/status/1386077306381242371?ref_url=https%3A%2F%2Fwww.benweintraub.com%2F&ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1386077306381242371%7Ctwgr%5E13dd6945ce97e163ca6ca5d28b54fc562b161b2f%7Ctwcon%5Es1_",
+    "https://twitter.com/thingskatedid/status/1386077306381242371"
   ),
 
   url_with_cloudflare_query_param: (
