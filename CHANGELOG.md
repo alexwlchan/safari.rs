@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.12 (2023-02-20)
+
+*   URL tweak: remove another parameter from Twitter URLs.
+
 ## v2.3.11 (2023-02-07)
 
 *   URL tweak: remove more referrer parameters from Twitter URLs.

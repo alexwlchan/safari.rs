@@ -216,6 +216,7 @@ pub fn tidy_url(url: &str) -> String {
         remove_query_param(&mut parsed_url, "s");
         remove_query_param(&mut parsed_url, "ref_url");
         remove_query_param(&mut parsed_url, "ref_src");
+        remove_query_param(&mut parsed_url, "cxt");
     }
 
     // Convert links to questions on Stack Overflow to insert my sharing
@@ -396,6 +397,11 @@ tidy_url_tests! {
   regular_twitter: (
     "https://twitter.com/WholesomeMeme/status/846421658835537921",
     "https://twitter.com/WholesomeMeme/status/846421658835537921"
+  ),
+
+  twitter_with_tracking_param: (
+    "https://twitter.com/b0rk/status/1627763836479479811?cxt=HHwWhoCxubil_ZYtAAAA",
+    "https://twitter.com/b0rk/status/1627763836479479811"
   ),
 
   amazon_product: (
@@ -651,6 +657,11 @@ tidy_url_tests! {
   twitter_with_ref: (
     "https://twitter.com/thingskatedid/status/1386077306381242371?ref_url=https%3A%2F%2Fwww.benweintraub.com%2F&ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1386077306381242371%7Ctwgr%5E13dd6945ce97e163ca6ca5d28b54fc562b161b2f%7Ctwcon%5Es1_",
     "https://twitter.com/thingskatedid/status/1386077306381242371"
+  ),
+
+  twitter_with_cxt: (
+    "https://twitter.com/b0rk/status/1627763836479479811?cxt=HHwWhoCxubil_ZYtAAAA",
+    "https://twitter.com/b0rk/status/1627763836479479811"
   ),
 
   url_with_cloudflare_query_param: (
