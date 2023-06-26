@@ -81,6 +81,10 @@ pub fn tidy_url(url: &str) -> String {
 
     // Remove '#notes' from Tumblr URLs
     if parsed_url.netloc.ends_with("tumblr.com") {
+        remove_query_param(&mut parsed_url, "_branch_referrer");
+        remove_query_param(&mut parsed_url, "_branch_match_id");
+        remove_query_param(&mut parsed_url, "source");
+
         parsed_url.fragment = match parsed_url.fragment {
             Some(fragment) => {
                 if fragment == "notes" {
@@ -422,6 +426,11 @@ tidy_url_tests! {
   tumblr_with_notes: (
     "http://azurelunatic.tumblr.com/post/155525051123/things-about-hufflepuffs-539#notes",
     "http://azurelunatic.tumblr.com/post/155525051123/things-about-hufflepuffs-539"
+  ),
+
+  tumblr_with_tracking: (
+    "https://www.tumblr.com/tightleish/709085976781324289?_branch_referrer=H4sIAAAAAAAAAwXBAQqAIAwAwB8509Vmv6kQpyhFzvD53Ynq03eAQ42OdtbXXHcDzUm0xtwFyAbLa6CNePEOHQeYOGL6Cpbp6Qe%2F0rcpQAAAAA%3D%3D&source=share&_branch_match_id=1137383385327673172",
+    "https://www.tumblr.com/tightleish/709085976781324289"
   ),
 
   buzzfeed_with_tracking: (
