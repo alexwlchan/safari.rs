@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.13 (2023-06-26)
+
+*   URL tweak: remove tracking parameters from Tumblr URLs.
+
 ## v2.3.12 (2023-02-20)
 
 *   URL tweak: remove another parameter from Twitter URLs.
