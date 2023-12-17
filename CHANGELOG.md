@@ -1,8 +1,8 @@
 # Changelog
 
-## v2.3.13 (2023-06-26)
+## v2.3.14 (2023-12-17)
 
-*   URL tweak: remove tracking parameters from Tumblr URLs.
+*   URL tweak: remove tracking parameters from Etsy URLs.
 
 ## v2.3.12 (2023-02-20)
 

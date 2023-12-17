@@ -162,9 +162,12 @@ pub fn tidy_url(url: &str) -> String {
     // Remove Google Analytics parameters from Etsy URLs.
     if parsed_url.netloc == "www.etsy.com" {
         remove_query_param(&mut parsed_url, "awc");
+        remove_query_param(&mut parsed_url, "click_key");
+        remove_query_param(&mut parsed_url, "click_sum");
+        remove_query_param(&mut parsed_url, "crt");
         remove_query_param(&mut parsed_url, "frs");
-        remove_query_param(&mut parsed_url, "source");
         remove_query_param(&mut parsed_url, "pro");
+        remove_query_param(&mut parsed_url, "source");
 
         parsed_url.query = match parsed_url.query {
             Some(qs) => {
@@ -621,6 +624,11 @@ tidy_url_tests! {
   etsy_link_with_tracking: (
     "https://www.etsy.com/uk/listing/731582894/personalised-song-lyric-or-poetry?frs=1",
     "https://www.etsy.com/uk/listing/731582894/personalised-song-lyric-or-poetry",
+  ),
+
+  etsy_link_with_tmore_tracking: (
+    "https://www.etsy.com/uk/listing/1487193769/progress-goose-pdf-gay-pride-month-cross?click_sum=15f8aef5&click_key=d478a4a346e8318cc55887564ddfef8f5687fb60%3A1487193769&crt=1",
+    "https://www.etsy.com/uk/listing/1487193769/progress-goose-pdf-gay-pride-month-cross",
   ),
 
   blogspot: (
