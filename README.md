@@ -1,3 +1,7 @@
+**Archived 11 February 2024:** this was a fun experiment in using Rust, but I'm no longer using or maintaining it – I've replaced it with JavaScript For Automation (JXA) scripts that I run directly.
+
+---
+
 # safari.rs
 
 safari.rs provides some tools for interacting with Safari on the command-line.
